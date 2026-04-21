@@ -4,15 +4,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.config import get_settings
 
 import src.auth.router as auth
-
-
-api_router = APIRouter(prefix="/api")
-api_router.include_router(auth.router)
+import src.test.router as test
 
 
 settings = get_settings()
 
+api_router = APIRouter(prefix="/api")
+api_router.include_router(auth.router)
+
 if settings.environment == "dev":
+    api_router.include_router(test.router)
+
     app = FastAPI()
 
     app.add_middleware(

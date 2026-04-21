@@ -9,6 +9,8 @@ class Settings(BaseSettings):
 
     database_url: str = Field("sqlite:///db.sqlite3")
 
+    jwt_secret: str = Field("changeitinprod")
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

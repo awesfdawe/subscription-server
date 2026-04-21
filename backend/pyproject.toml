@@ -13,6 +13,7 @@ dependencies = [
     "pydantic>=2.13.3",
     "pydantic-ai-slim[google]>=1.84.1",
     "pydantic-settings>=2.14.0",
+    "pyjwt>=2.12.1",
     "sqlmodel>=0.0.38",
 ]
 
