@@ -46,7 +46,7 @@ def login(user: RegisterRequest, response: Response, session: Session = Depends(
             if settings.environment == "dev":
                 secure = False
 
-            access_payload = TokenPayload(user_id=db_user.id, exp=datetime.now(timezone.utc) + timedelta(hours=6))
+            access_payload = TokenPayload(user_id=db_user.id, exp=datetime.now(timezone.utc) + timedelta(hours=2))
             response.set_cookie(
                 key="access_token",
                 value=jwt.encode(
@@ -57,8 +57,8 @@ def login(user: RegisterRequest, response: Response, session: Session = Depends(
                 httponly=True,
                 secure=secure,
                 samesite="lax",
-                max_age=21600,  # 6h
-                expires=21600,
+                max_age=7200,  # 2h
+                expires=7200,
                 path="/api",
             )
             return {"detail": "Successfully logged in."}
