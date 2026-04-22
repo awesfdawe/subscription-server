@@ -16,4 +16,4 @@ def is_first_setup_done(session: Session = Depends(get_session)):
     if existing_admin:
         return {"ready": True}
     else:
-        {"ready": False}
+        return {"ready": False}
