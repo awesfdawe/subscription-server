@@ -6,8 +6,8 @@ from sqlmodel import Session, select
 from src.config import get_settings
 from src.auth.dependencies import get_current_admin
 from src.database import get_session
-from src.models import Users
-from src.users.schemas import UserCreateRequest, UserUpdateRequest
+from .models import Users
+from .schemas import UserCreateRequest, UserUpdateRequest
 
 settings = get_settings()
 

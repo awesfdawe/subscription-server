@@ -1,5 +1,4 @@
-from sqlmodel import SQLModel
-from src.models import Admins, Users  # noqa: F401
+from src.models import SQLModel
 from src.config import get_settings
 
 from logging.config import fileConfig

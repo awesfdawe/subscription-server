@@ -7,8 +7,8 @@ import jwt
 
 from src.config import get_settings
 from src.database import get_session
-from src.auth.schemas import RegisterRequest, TokenPayload
-from src.models import Admins
+from .schemas import RegisterRequest, TokenPayload
+from .models import Admins
 
 settings = get_settings()
 
