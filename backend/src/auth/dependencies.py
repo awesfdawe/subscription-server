@@ -3,21 +3,32 @@ from pydantic import ValidationError
 import jwt
 
 from src.config import get_settings
-from src.auth.schemas import TokenPayload
+from .schemas import TokenPayload
+from .utils import get_admin
 
 settings = get_settings()
 
 
-def get_current_admin(access_token: str | None = Cookie(default=None)):
+def is_admin(access_token: str | None = Cookie(default=None)):
     if not access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not logged in. Please log in.")
+    print(f"Token from cookie: {access_token}")
+    admin = get_admin()
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="The admin account has not been created yet. Please try registering.",
+        )
 
     try:
         payload = jwt.decode(access_token, settings.jwt_secret, algorithms=["HS256"])
 
         payload = TokenPayload(**payload)
 
-        return payload.user_id
+        if payload.password_version == admin.password_version:
+            return
+        else:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not logged in. Please log in.")
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired.")

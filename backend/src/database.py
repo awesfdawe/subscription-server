@@ -1,5 +1,7 @@
 from sqlmodel import create_engine, Session
 from sqlalchemy import event
+from contextlib import contextmanager
+from typing import Generator
 
 from src.config import get_settings
 
@@ -24,6 +26,12 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-def get_session():
+@contextmanager
+def db_session() -> Generator[Session]:
+    with Session(engine) as session:
+        yield session
+
+
+def get_session() -> Generator[Session]:
     with Session(engine) as session:
         yield session
