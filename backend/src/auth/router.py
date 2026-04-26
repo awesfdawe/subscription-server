@@ -34,7 +34,7 @@ def register(user: RegisterRequest, session: Session = Depends(get_session)):
 
 @router.post("/login")
 def login(user: RegisterRequest, response: Response, session: Session = Depends(get_session)):
-    db_user = session.exec(select(Admins)).first()
+    db_user = session.get(Admins, 1)
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
