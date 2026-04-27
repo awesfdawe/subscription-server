@@ -16,3 +16,6 @@ db.sqlite3-shm
 
 # ruff
 .ruff_cache/
+
+# misc
+openapi.json
