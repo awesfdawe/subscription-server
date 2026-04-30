@@ -5,6 +5,7 @@
         "svelte.svelte-vscode",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "ms-azuretools.vscode-containers"
+        "ms-azuretools.vscode-containers",
+        "bradlc.vscode-tailwindcss"
     ]
 }
