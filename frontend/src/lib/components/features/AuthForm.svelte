@@ -11,14 +11,14 @@
 		<div class="flex flex-col gap-4">
 			<fieldset class="fieldset">
 				<legend class="fieldset-legend">Username</legend>
-				<label class="input w-full bg-base-300 flex items-center gap-3">
+				<label class="input flex w-full items-center gap-3 bg-base-300">
 					<UserRound size={18} class="text-base-content/40" />
 					<input type="text" class="grow" placeholder="johndoe" name="username" required />
 				</label>
 			</fieldset>
 			<fieldset class="fieldset">
 				<legend class="fieldset-legend">Password</legend>
-				<label class="input w-full bg-base-300 flex items-center gap-3">
+				<label class="input flex w-full items-center gap-3 bg-base-300">
 					<KeyRound size={18} class="text-base-content/40" />
 					<input type="password" class="grow" placeholder="••••••••" name="password" required />
 				</label>
