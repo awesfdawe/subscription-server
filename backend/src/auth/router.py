@@ -7,9 +7,10 @@ import jwt
 
 from src.config import get_settings
 from src.database import get_session
-from .schemas import RegisterRequest, TokenPayload
+from .schemas import RegisterRequest, TokenPayload, UpdateRequest
 from .models import Admins
 from .utils import get_admin
+from .dependencies import is_admin
 
 settings = get_settings()
 
@@ -70,3 +71,29 @@ def login(user: RegisterRequest, response: Response):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
     except VerifyMismatchError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+
+
+@router.post("/update", dependencies=[Depends(is_admin)])
+def update(user_data: UpdateRequest, session: Session = Depends(get_session)):
+    db_user = get_admin()
+
+    try:
+        ph.verify(db_user.hashed_password, user_data.old_password)
+    except VerifyMismatchError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect old password")
+
+    update_data = {}
+    if user_data.new_username:
+        update_data["username"] = user_data.new_username
+
+    if user_data.new_password:
+        update_data["hashed_password"] = ph.hash(user_data.new_password)
+
+    update_data["password_version"] = db_user.password_version + 1
+
+    db_user.sqlmodel_update(update_data)
+
+    session.add(db_user)
+    session.commit()
+    get_admin.cache_clear()
+    return {"detail": "Successfully updated auth info."}
