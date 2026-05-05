@@ -12,7 +12,7 @@ class XhttpReuseSettings(BaseModel):
 
 
 class XhttpTransport(BaseModel):
-    network: Literal["xhttp"] = "xhttp"
+    transport: Literal["xhttp"] = "xhttp"
 
     path: str = "/"
     host: Optional[str] = None
@@ -34,7 +34,9 @@ class XhttpTransport(BaseModel):
         default=None, validation_alias="session-placement"
     )
     session_key: Optional[str] = Field(default=None, validation_alias="session-key")
-    seq_placement: Optional[Literal["path", "query", "cookie", "header"]] = Field(default=None, validation_alias="seq-placement")
+    seq_placement: Optional[Literal["path", "query", "cookie", "header"]] = Field(
+        default=None, validation_alias="seq-placement"
+    )
     seq_key: Optional[str] = Field(default=None, validation_alias="seq-key")
 
     sc_max_each_post_bytes: Optional[str] = Field(default=None, validation_alias="sc-max-each-post-bytes")
@@ -48,7 +50,9 @@ class XhttpTransport(BaseModel):
     x_padding_placement: Optional[Literal["queryInHeader", "cookie", "header", "query"]] = Field(
         default=None, validation_alias="x-padding-placement"
     )
-    x_padding_method: Optional[Literal["repeat-x", "tokenish"]] = Field(default=None, validation_alias="x-padding-method")
+    x_padding_method: Optional[Literal["repeat-x", "tokenish"]] = Field(
+        default=None, validation_alias="x-padding-method"
+    )
 
     reuse_settings: Optional[XhttpReuseSettings] = Field(default=None, alvalidation_aliasias="reuse-settings")
     download_settings: Optional[Dict[str, Any]] = Field(default=None, validation_alias="download-settings")

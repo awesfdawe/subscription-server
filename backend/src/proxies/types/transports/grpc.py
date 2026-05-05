@@ -14,6 +14,6 @@ class GrpcOpts(BaseModel):
 
 
 class GrpcTransport(BaseModel):
-    network: Literal["grpc"] = "grpc"
+    transport: Literal["grpc"] = "grpc"
 
     grpc_opts: Optional[GrpcOpts] = Field(default=None, validation_alias="grpc-opts")

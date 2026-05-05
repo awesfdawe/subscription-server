@@ -1,15 +1,12 @@
-from pydantic import BaseModel
-from typing import Optional, Union
+from pydantic import BaseModel, Field
+from typing import Annotated, Optional
 
-from .protocols.vless import VlessSettings
-from .transports.ws import WsTransport
-from .transports.grpc import GrpcTransport
-from .transports.xhttp import XhttpTransport
-from .transports.tcp import TcpTransport
-
-TransportConfig = Union[WsTransport, GrpcTransport, TcpTransport, XhttpTransport]
+from .protocols import ProtocolsConfig
+from .security import SecurityConfig
+from .transports import TransportConfig
 
 
 class ProxyConfig(BaseModel):
-    protocol_settings: VlessSettings
-    transport: Optional[TransportConfig] = None
+    protocol_settings: Annotated[ProtocolsConfig, Field(discriminator="protocol")]
+    security_settings: Optional[Annotated[SecurityConfig, Field(discriminator="security")]]
+    transport_settings: Optional[Annotated[TransportConfig, Field(discriminator="transport")]]

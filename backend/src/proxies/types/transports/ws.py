@@ -12,6 +12,6 @@ class WsOpts(BaseModel):
 
 
 class WsTransport(BaseModel):
-    network: Literal["ws"] = "ws"
+    transport: Literal["ws"] = "ws"
 
     ws_opts: Optional[WsOpts] = Field(default=None, validation_alias="ws-opts")

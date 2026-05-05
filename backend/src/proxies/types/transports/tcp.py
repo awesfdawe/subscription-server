@@ -11,6 +11,6 @@ class TcpOpts(BaseModel):
 
 
 class TcpTransport(BaseModel):
-    network: Literal["tcp"] = "tcp"
+    transport: Literal["tcp"] = "tcp"
 
     tcp_opts: Optional[TcpOpts] = Field(default=None, alias="tcp-opts")
