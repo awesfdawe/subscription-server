@@ -1,5 +1,7 @@
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 from typing import List
+
+from .types.bundle import ProxyConfig
 
 
 class ProxyProviders(SQLModel, table=True):
@@ -19,8 +21,16 @@ class Proxies(SQLModel, table=True):
     server: str
     port: int
 
-    # config:
+    config_data: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
     provider_id: int = Field(foreign_key="proxyproviders.id")
 
     provider: ProxyProviders = Relationship(back_populates="servers")
+
+    @property
+    def config(self) -> ProxyConfig:
+        return ProxyConfig.model_validate(self.config_data)
+
+    @config.setter
+    def config(self, config: ProxyConfig):
+        self.config_data = config.model_dump(by_alias=True, exclude_none=True)
