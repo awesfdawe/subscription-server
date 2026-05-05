@@ -11,5 +11,5 @@ SQLModel.metadata.naming_convention = {
 # ruff: disable[E402, F401]
 from src.auth.models import Admins
 from src.users.models import Users
-from src.vpn.models import VPNProviders, VPNServers
+from src.proxies.models import Proxies, ProxyProviders
 # ruff: enable[E402, F401]
