@@ -7,7 +7,6 @@ import src.auth.router as auth
 
 import src.users.router as users
 import src.misc.router as misc
-import src.test.router as test
 
 
 settings = get_settings()
@@ -18,8 +17,6 @@ api_router.include_router(users.router)
 api_router.include_router(misc.router)
 
 if settings.environment == "dev":
-    api_router.include_router(test.router)
-
     app = FastAPI()
 
     app.add_middleware(
