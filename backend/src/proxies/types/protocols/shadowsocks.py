@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class ShadowsocksSettings(BaseModel):
-    protocol: Literal["shadowsocks"] = "shadowsocks"
+    protocol: Literal["shadowsocks", "ss"] = "shadowsocks"
 
     cipher: str = Field(default="aes-128-gcm")
     password: str

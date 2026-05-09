@@ -54,5 +54,5 @@ class XhttpTransport(BaseModel):
         default=None, validation_alias="x-padding-method"
     )
 
-    reuse_settings: Optional[XhttpReuseSettings] = Field(default=None, alvalidation_aliasias="reuse-settings")
+    reuse_settings: Optional[XhttpReuseSettings] = Field(default=None, validation_alias="reuse-settings")
     download_settings: Optional[Dict[str, Any]] = Field(default=None, validation_alias="download-settings")

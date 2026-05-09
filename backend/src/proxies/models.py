@@ -1,7 +1,8 @@
-from sqlmodel import Field, SQLModel, Relationship, Column, JSON
+from sqlmodel import Field, SQLModel, Relationship, Column, JSON, AutoString
 from typing import List
 
-from .types.bundle import ProxyConfig
+from src.proxies.types.bundle import ProxyConfig
+from src.proxies.types.protocols import protocols
 
 
 class ProxyProviders(SQLModel, table=True):
@@ -17,9 +18,9 @@ class Proxies(SQLModel, table=True):
     original_name: str = Field(min_length=1, max_length=100)
     name: str = Field(min_length=1, max_length=40)
 
-    protocol: str
-    server: str
-    port: int
+    protocol: protocols = Field(sa_type=AutoString)
+    server: str = Field(max_length=1000)
+    port: int = Field(gt=0, le=65535)
 
     config_data: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
