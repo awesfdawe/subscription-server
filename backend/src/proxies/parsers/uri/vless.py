@@ -1,10 +1,10 @@
 from urllib.parse import ParseResult
 
-from src.proxies.models import Proxies
+from src.proxies.models import Proxy
 from src.proxies.types.bundle import ProxyConfig
 
 
-def parse(parsed: ParseResult, query: dict, name: str) -> Proxies:
+def parse(parsed: ParseResult, query: dict, name: str) -> Proxy:
     flat_data = {"uuid": parsed.username, **query}
 
     network_type = query.get("type", "tcp")
@@ -19,7 +19,7 @@ def parse(parsed: ParseResult, query: dict, name: str) -> Proxies:
     if security_type != "none":
         raw_config["security_settings"] = {"security": security_type, **flat_data}
 
-    db_proxy = Proxies(original_name=name, name=name, protocol="vless", server=parsed.hostname, port=parsed.port)
+    db_proxy = Proxy(original_name=name, name=name, protocol="vless", server=parsed.hostname, port=parsed.port)
     db_proxy.config = ProxyConfig.model_validate(raw_config)
 
     return db_proxy

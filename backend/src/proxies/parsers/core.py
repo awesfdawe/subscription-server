@@ -1,7 +1,7 @@
 from urllib.parse import urlparse, parse_qsl, unquote
 from typing import Callable, Dict
 
-from src.proxies.models import Proxies
+from src.proxies.models import Proxy
 from src.proxies.parsers.uri import vless
 
 
@@ -9,7 +9,7 @@ class UriParserManager:
     _parsers: Dict[str, Callable] = {"vless": vless.parse}
 
     @classmethod
-    def parse(cls, uri: str) -> Proxies:
+    def parse(cls, uri: str) -> Proxy:
         parsed_url = urlparse(uri)
         scheme = parsed_url.scheme.lower()
 

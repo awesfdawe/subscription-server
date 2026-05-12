@@ -5,15 +5,19 @@ from src.proxies.types.bundle import ProxyConfig
 from src.proxies.types.protocols import protocols
 
 
-class ProxyProviders(SQLModel, table=True):
+class ProxyProvider(SQLModel, table=True):
+    __tablename__ = "proxy_providers"
+
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(min_length=1, max_length=40)
     show_name: bool
 
-    servers: List[Proxies] = Relationship(back_populates="provider")
+    servers: List[Proxy] = Relationship(back_populates="provider")
 
 
-class Proxies(SQLModel, table=True):
+class Proxy(SQLModel, table=True):
+    __tablename__ = "proxies"
+
     id: int | None = Field(default=None, primary_key=True)
     original_name: str = Field(min_length=1, max_length=100)
     name: str = Field(min_length=1, max_length=40)
@@ -24,9 +28,9 @@ class Proxies(SQLModel, table=True):
 
     config_data: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
-    provider_id: int = Field(foreign_key="proxyproviders.id")
+    provider_id: int = Field(foreign_key="proxy_providers.id")
 
-    provider: ProxyProviders = Relationship(back_populates="servers")
+    provider: ProxyProvider = Relationship(back_populates="servers")
 
     @property
     def config(self) -> ProxyConfig:

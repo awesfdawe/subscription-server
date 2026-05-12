@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from src.config import get_settings
 from src.auth.dependencies import is_admin
 from src.database import get_session
-from .models import Users
+from .models import User
 from .schemas import UserCreateRequest, UserUpdateRequest
 
 settings = get_settings()
@@ -14,9 +14,9 @@ settings = get_settings()
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=Users, dependencies=[Depends(is_admin)])
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=User, dependencies=[Depends(is_admin)])
 def create(user_data: UserCreateRequest, session: Session = Depends(get_session)):
-    db_user = Users(**user_data.model_dump())
+    db_user = User(**user_data.model_dump())
 
     session.add(db_user)
     session.commit()
@@ -24,13 +24,13 @@ def create(user_data: UserCreateRequest, session: Session = Depends(get_session)
     return db_user
 
 
-@router.patch("/{user_id}", response_model=Users, dependencies=[Depends(is_admin)])
+@router.patch("/{user_id}", response_model=User, dependencies=[Depends(is_admin)])
 def update(
     user_id: int,
     user_data: UserUpdateRequest,
     session: Session = Depends(get_session),
 ):
-    db_user = session.get(Users, user_id)
+    db_user = session.get(User, user_id)
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
     update_data = user_data.model_dump(exclude_unset=True)
@@ -44,7 +44,7 @@ def update(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(is_admin)])
 def delete(user_id: int, session: Session = Depends(get_session)):
-    user = session.get(Users, user_id)
+    user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
@@ -53,9 +53,9 @@ def delete(user_id: int, session: Session = Depends(get_session)):
     return None
 
 
-@router.get("/", response_model=Page[Users], dependencies=[Depends(is_admin)])
+@router.get("/", response_model=Page[User], dependencies=[Depends(is_admin)])
 def get_users(session: Session = Depends(get_session)):
-    query = select(Users).order_by(Users.id)
+    query = select(User).order_by(User.id)
     return paginate(session, query)
 
 

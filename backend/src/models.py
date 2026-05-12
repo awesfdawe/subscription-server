@@ -9,7 +9,7 @@ SQLModel.metadata.naming_convention = {
 }
 
 # ruff: disable[E402, F401]
-from src.auth.models import Admins
-from src.users.models import Users
-from src.proxies.models import Proxies, ProxyProviders
+from src.auth.models import Admin
+from src.users.models import User
+from src.proxies.models import Proxy, ProxyProvider
 # ruff: enable[E402, F401]

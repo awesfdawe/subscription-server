@@ -8,7 +8,7 @@ import jwt
 from src.config import get_settings
 from src.database import get_session
 from .schemas import RegisterRequest, TokenPayload, UpdateRequest
-from .models import Admins
+from .models import Admin
 from .utils import get_admin
 from .dependencies import is_admin
 
@@ -28,7 +28,7 @@ def register(user: RegisterRequest, session: Session = Depends(get_session)):
             detail="An admin account has already been created. Only one account is allowed. Please try logging in.",
         )
 
-    db_user = Admins.model_validate(user, update={"hashed_password": ph.hash(user.password)})
+    db_user = Admin.model_validate(user, update={"hashed_password": ph.hash(user.password)})
     session.add(db_user)
     session.commit()
     get_admin.cache_clear()
