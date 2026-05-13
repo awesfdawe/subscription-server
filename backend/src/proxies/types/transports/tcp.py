@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 from pydantic import BaseModel, Field
 
 
@@ -7,10 +7,10 @@ class TcpObfsHeader(BaseModel):
 
 
 class TcpOpts(BaseModel):
-    header: Optional[TcpObfsHeader] = None
+    header: TcpObfsHeader | None = None
 
 
 class TcpTransport(BaseModel):
     transport: Literal["tcp"] = "tcp"
 
-    tcp_opts: Optional[TcpOpts] = Field(default=None, validation_alias="tcp-opts")
+    tcp_opts: TcpOpts | None = Field(default=None, validation_alias="tcp-opts")

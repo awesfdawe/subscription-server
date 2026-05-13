@@ -1,5 +1,4 @@
 from sqlmodel import Field, SQLModel, Relationship, Column, JSON, AutoString
-from typing import List
 
 from src.proxies.types.bundle import ProxyConfig
 from src.proxies.types.protocols import protocols
@@ -12,7 +11,7 @@ class ProxyProvider(SQLModel, table=True):
     name: str = Field(min_length=1, max_length=40)
     show_name: bool
 
-    servers: List[Proxy] = Relationship(back_populates="provider")
+    servers: list[Proxy] = Relationship(back_populates="provider")
 
 
 class Proxy(SQLModel, table=True):

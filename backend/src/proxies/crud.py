@@ -1,5 +1,5 @@
 from sqlmodel import select, Session
-from typing import Sequence
+from collections.abc import Sequence
 
 from .models import ProxyProvider
 

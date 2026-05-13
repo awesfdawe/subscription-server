@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Dict, Any
+from typing import Literal, Any
 from pydantic import BaseModel, Field
 
 
@@ -8,11 +8,11 @@ class ShadowsocksSettings(BaseModel):
     cipher: str = Field(default="aes-128-gcm")
     password: str
 
-    udp_over_tcp: Optional[bool] = Field(default=None, validation_alias="udp-over-tcp")
-    udp_over_tcp_version: Optional[int] = Field(default=None, validation_alias="udp-over-tcp-version")
+    udp_over_tcp: bool | None = Field(default=None, validation_alias="udp-over-tcp")
+    udp_over_tcp_version: int | None = Field(default=None, validation_alias="udp-over-tcp-version")
 
-    plugin: Optional[str] = Field(default=None)
-    plugin_opts: Optional[Dict[str, Any]] = Field(default=None, validation_alias="plugin-opts")
+    plugin: int | None = Field(default=None)
+    plugin_opts: dict[str, Any] | None = Field(default=None, validation_alias="plugin-opts")
 
-    level: Optional[int] = Field(default=None)
-    email: Optional[str] = Field(default=None)
+    level: int | None = Field(default=None)
+    email: str | None = Field(default=None)

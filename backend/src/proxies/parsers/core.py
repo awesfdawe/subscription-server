@@ -1,12 +1,12 @@
 from urllib.parse import urlparse, parse_qsl, unquote
-from typing import Callable, Dict
+from collections.abc import Callable
 
 from src.proxies.models import Proxy
 from src.proxies.parsers.uri import vless
 
 
 class UriParserManager:
-    _parsers: Dict[str, Callable] = {"vless": vless.parse}
+    _parsers: dict[str, Callable] = {"vless": vless.parse}
 
     @classmethod
     def parse(cls, uri: str) -> Proxy:

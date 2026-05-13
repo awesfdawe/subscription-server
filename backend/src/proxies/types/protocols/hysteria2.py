@@ -1,4 +1,4 @@
-from typing import Literal, Optional, List
+from typing import Literal
 from pydantic import BaseModel, Field
 
 
@@ -7,13 +7,13 @@ class Hysteria2Settings(BaseModel):
 
     password: str
 
-    up: Optional[str] = Field(default=None)
-    down: Optional[str] = Field(default=None)
+    up: str | None = Field(default=None)
+    down: str | None = Field(default=None)
 
-    obfs: Optional[str] = Field(default=None)
-    obfs_password: Optional[str] = Field(default=None, validation_alias="obfs-password")
+    obfs: str | None = Field(default=None)
+    obfs_password: str | None = Field(default=None, validation_alias="obfs-password")
 
-    server_name: Optional[str] = Field(default=None, validation_alias="sni")
-    skip_cert_verify: Optional[bool] = Field(default=None, validation_alias="skip-cert-verify")
-    alpn: Optional[List[str]] = Field(default=None)
-    fingerprint: Optional[str] = Field(default=None)
+    server_name: str | None = Field(default=None, validation_alias="sni")
+    skip_cert_verify: bool | None = Field(default=None, validation_alias="skip-cert-verify")
+    alpn: list[str] | None = Field(default=None)
+    fingerprint: str | None = Field(default=None)
