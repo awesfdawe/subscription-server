@@ -18,8 +18,9 @@ def parse(parsed: ParseResult, query: dict, name: str) -> Proxy:
 
     if security_type != "none":
         raw_config["security_settings"] = {"security": security_type, **flat_data}
-
-    db_proxy = Proxy(original_name=name, name=name, protocol="vless", server=parsed.hostname, port=parsed.port)
-    db_proxy.config = ProxyConfig.model_validate(raw_config)
+    
+    if name and parsed.hostname and parsed.port:
+        db_proxy = Proxy(original_name=name, name=name, protocol="vless", server=parsed.hostname, port=parsed.port) # ty: ignore add provider id here 
+        db_proxy.config = ProxyConfig.model_validate(raw_config)
 
     return db_proxy

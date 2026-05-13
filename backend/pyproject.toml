@@ -21,7 +21,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.15.11",
+    "ty>=0.0.35",
 ]
 
 [tool.ruff]
 line-length = 120
+
+[tool.ty.src]
+exclude = ["alembic"]

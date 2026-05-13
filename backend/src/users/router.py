@@ -55,7 +55,7 @@ def delete(user_id: int, session: Session = Depends(get_session)):
 
 @router.get("/", response_model=Page[User], dependencies=[Depends(is_admin)])
 def get_users(session: Session = Depends(get_session)):
-    query = select(User).order_by(User.id)
+    query = select(User)
     return paginate(session, query)
 
 

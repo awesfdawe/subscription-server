@@ -21,9 +21,9 @@ def is_admin(access_token: str | None = Cookie(default=None)):
         )
 
     try:
-        payload = jwt.decode(access_token, settings.jwt_secret, algorithms=["HS256"])
+        raw_payload = jwt.decode(access_token, settings.jwt_secret, algorithms=["HS256"])
 
-        payload = TokenPayload(**payload)
+        payload = TokenPayload(**raw_payload)
 
         if payload.password_version == admin.password_version:
             return

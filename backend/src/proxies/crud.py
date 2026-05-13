@@ -1,14 +1,14 @@
 from sqlmodel import select, Session
-from typing import List
+from typing import Sequence
 
-from .models import ProxyProvider, Proxy
+from .models import ProxyProvider
 
 
 def get_proxy_provider(session: Session, provider_id: int) -> ProxyProvider | None:
     return session.get(ProxyProvider, provider_id)
 
 
-def get_proxy_providers(session: Session, offset: int = 0, limit: int = 100) -> List[ProxyProvider]:
+def get_proxy_providers(session: Session, offset: int = 0, limit: int = 100) -> Sequence[ProxyProvider]:
     query = select(ProxyProvider).offset(offset).limit(limit)
     results = session.exec(query)
     return results.all()

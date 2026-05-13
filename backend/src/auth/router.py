@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from sqlmodel import Session
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from typing import Any
 import jwt
 
 from src.config import get_settings
@@ -77,12 +78,15 @@ def login(user: RegisterRequest, response: Response):
 def update(user_data: UpdateRequest, session: Session = Depends(get_session)):
     db_user = get_admin()
 
+    if not db_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin account doesn't exist yet.")
+
     try:
         ph.verify(db_user.hashed_password, user_data.old_password)
     except VerifyMismatchError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect old password")
 
-    update_data = {}
+    update_data: dict[str, Any] = {}
     if user_data.new_username:
         update_data["username"] = user_data.new_username
 
