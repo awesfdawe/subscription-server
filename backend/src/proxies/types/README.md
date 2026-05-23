@@ -1,1 +1,0 @@
-Most of these pydantic schemas were written by AI. The parameter sources are taken from https://github.com/XTLS/Xray-core and https://wiki.metacubex.one/ru/config/proxies/
