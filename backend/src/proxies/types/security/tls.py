@@ -4,9 +4,7 @@ from pydantic import BaseModel, Field
 
 class EchOpts(BaseModel):
     pq_signature_schemes: list[str] | None = Field(default=None, validation_alias="pq-signature-schemes")
-    dynamic_record_sizing_disabled: bool | None = Field(
-        default=None, validation_alias="dynamic-record-sizing-disabled"
-    )
+    dynamic_record_sizing_disabled: bool | None = Field(default=None, validation_alias="dynamic-record-sizing-disabled")
     config: str | None = Field(default=None, validation_alias="config")
     config_list: str | None = Field(default=None, validation_alias="config-list")
 

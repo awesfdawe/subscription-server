@@ -50,9 +50,7 @@ class XhttpTransport(BaseModel):
     x_padding_placement: Literal["queryInHeader", "cookie", "header", "query"] | None = Field(
         default=None, validation_alias="x-padding-placement"
     )
-    x_padding_method: Literal["repeat-x", "tokenish"] | None = Field(
-        default=None, validation_alias="x-padding-method"
-    )
+    x_padding_method: Literal["repeat-x", "tokenish"] | None = Field(default=None, validation_alias="x-padding-method")
 
     reuse_settings: XhttpReuseSettings | None = Field(default=None, validation_alias="reuse-settings")
     download_settings: dict[str, Any] | None = Field(default=None, validation_alias="download-settings")
