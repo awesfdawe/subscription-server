@@ -1,0 +1,23 @@
+[project]
+name = "subscription-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "outbound-models",
+]
+
+[tool.uv.workspace]
+members = [
+    "outbound-models",
+]
+
+[tool.uv.sources]
+outbound-models = { workspace = true, editable = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.14",
+    "ty>=0.0.39",
+]
