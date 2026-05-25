@@ -21,3 +21,6 @@ dev = [
     "ruff>=0.15.14",
     "ty>=0.0.39",
 ]
+
+[tool.ruff]
+line-length = 120
