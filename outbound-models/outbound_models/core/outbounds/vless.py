@@ -4,6 +4,7 @@ from uuid import UUID
 
 from .base import BaseOutbound
 from ..transports import AnyTransport
+from ..security import AnySecurity
 
 mlkem_encryption_pattern = (
     r"^mlkem768x25519plus\."
@@ -22,5 +23,5 @@ class VlessOutbound(BaseOutbound, tag="vless"):
 
     encryption: Annotated[str, Meta(pattern=mlkem_encryption_pattern)] | None = None
     flow: Literal["xtls-rprx-vision", "xtls-rprx-vision-udp443"] | None = None
-    security: str | None = None
+    security: AnySecurity | None = None
     transport: AnyTransport | None = None

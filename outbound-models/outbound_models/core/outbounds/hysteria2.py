@@ -2,14 +2,15 @@ from typing import Annotated
 from msgspec import Meta, ValidationError
 
 from .base import BaseOutbound
-from ..transports import AnyTransport
+from ..security import AnySecurity  # Replace with hysteria2 security later
+from ..transports import AnyTransport  # Replace with hysteria2 transport later
 
 
 class Hysteria2Protocol(BaseOutbound, tag="hysteria2"):
     server: str
     server_port: Annotated[int, Meta(ge=1, le=65535)] | Annotated[str, Meta(pattern=r"^\d{1,5}:\d{1,5}$")]
 
-    security: str | None = None
+    security: AnySecurity | None = None
     transport: AnyTransport | None = None
 
     def __post_init__(self):
