@@ -24,7 +24,7 @@ FlowValues = Literal["xtls-rprx-vision", "xtls-rprx-vision-udp443"]
 
 class VlessOutbound(BaseOutbound, tag="vless"):
     server: str
-    server_port: Annotated[int, Meta(ge=1, le=65535)]
+    server_port: Annotated[int, Meta(ge=0, le=65535)]
     uuid: UUID
 
     encryption: Annotated[str, Meta(pattern=mlkem_encryption_pattern)] | None = None
