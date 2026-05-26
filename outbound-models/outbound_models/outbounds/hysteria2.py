@@ -2,11 +2,11 @@ from typing import Annotated
 from msgspec import Meta, ValidationError
 
 from .base import BaseOutbound
-from ..security import AnySecurity
-from ..transports.hysteria2 import Hysteria2Transport
+from .security import AnySecurity
+from .transports.hysteria2 import Hysteria2Transport
 
 
-class Hysteria2Protocol(BaseOutbound, tag="hysteria2"):
+class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
     server: str
     server_port: Annotated[int, Meta(ge=1, le=65535)] | Annotated[str, Meta(pattern=r"^\d{1,5}:\d{1,5}$")]
     transport: Hysteria2Transport
