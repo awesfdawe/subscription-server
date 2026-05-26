@@ -1,5 +1,6 @@
 import pytest
 from pathlib import Path
+from urllib.parse import unquote
 
 from outbound_models import Outbound
 from outbound_models.outbounds import AnyOutbound
@@ -12,7 +13,7 @@ def get_valid_links() -> list[str]:
         return [line.strip() for line in file if line.strip()]
 
 
-@pytest.fixture(params=get_valid_links())
+@pytest.fixture(params=get_valid_links(), ids=lambda link: unquote(link.split("#")[-1]) if "#" in link else link[:30])
 def link(request: pytest.FixtureRequest):
     return request.param
 

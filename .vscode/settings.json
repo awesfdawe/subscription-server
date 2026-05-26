@@ -1,9 +1,14 @@
 {
-    "svelte.enable-ts-plugin": true,
-	"files.associations": {
-		"*.css": "tailwindcss"
-	},
     "editor.quickSuggestions": {
         "strings": "on"
-    }
+    },
+
+    "svelte.enable-ts-plugin": true,
+    "files.associations": {
+        "*.css": "tailwindcss"
+    },
+
+    "python.testing.pytestArgs": ["outbound-models"],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
