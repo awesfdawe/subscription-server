@@ -7,7 +7,6 @@ from .transports.hysteria2 import Hysteria2Transport
 
 
 class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
-    server: str
     server_port: Annotated[int, Meta(ge=0, le=65535)] | Annotated[str, Meta(pattern=r"^\d{1,5}:\d{1,5}$")]
     transport: Hysteria2Transport
 

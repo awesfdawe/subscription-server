@@ -1,5 +1,5 @@
 from typing import Annotated, Literal, Self, get_args, cast
-from msgspec import Meta, ValidationError
+from msgspec import Meta
 from uuid import UUID
 from urllib.parse import SplitResult
 
@@ -23,8 +23,6 @@ FlowValues = Literal["xtls-rprx-vision", "xtls-rprx-vision-udp443"]
 
 
 class VlessOutbound(BaseOutbound, tag="vless"):
-    server: str
-    server_port: Annotated[int, Meta(ge=0, le=65535)]
     uuid: UUID
 
     encryption: Annotated[str, Meta(pattern=mlkem_encryption_pattern)] | None = None
@@ -40,12 +38,6 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             uuid = UUID(parsed.username)
         except ValueError, TypeError:
             raise ValueError("The URI contains an invalid UUID")
-
-        if not parsed.hostname:
-            raise ValueError("The hostname is missing from the URI")
-
-        if parsed.port is None:
-            raise ValueError("The port is missing from the URI")
 
         raw_encryption = query.get("encryption", [None])[0]
 
@@ -73,15 +65,14 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             case "tcp" | "raw" | _:
                 transport = None
 
-        try:
-            return cls(
-                server=parsed.hostname,
-                server_port=parsed.port,
-                uuid=uuid,
-                encryption=encryption,
-                flow=flow,
-                security=security,
-                transport=transport,
-            )
-        except ValidationError as e:
-            raise ValueError(f"Validation failed: {e}")
+        base_data = cls._base_parse_uri(parsed)
+        return cls(
+            server=base_data.server,
+            server_port=base_data.server_port,
+            tag=base_data.tag,
+            uuid=uuid,
+            encryption=encryption,
+            flow=flow,
+            security=security,
+            transport=transport,
+        )
