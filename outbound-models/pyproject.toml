@@ -14,3 +14,9 @@ dependencies = [
 
 [tool.ruff]
 line-length = 120
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.153.0",
+    "pytest>=9.0.3",
+]
