@@ -1,5 +1,5 @@
 from typing import Annotated, Literal, Self, get_args, cast
-from msgspec import Meta
+from msgspec import Meta, ValidationError
 from uuid import UUID
 from urllib.parse import SplitResult
 
@@ -34,15 +34,17 @@ class VlessOutbound(BaseOutbound, tag="vless"):
 
     @classmethod
     def from_uri(cls, parsed: SplitResult, query: dict[str, list[str]]) -> Self:
+        if not parsed.username:
+            raise ValueError("The UUID is missing from the URI")
         try:
             uuid = UUID(parsed.username)
-        except ValueError:
+        except (ValueError, TypeError):
             raise ValueError("The URI contains an invalid UUID")
 
         if not parsed.hostname:
             raise ValueError("The hostname is missing from the URI")
 
-        if not parsed.port:
+        if parsed.port is None:
             raise ValueError("The port is missing from the URI")
 
         raw_encryption = query.get("encryption", [None])[0]
@@ -71,12 +73,16 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             case "tcp" | "raw" | _:
                 transport = None
 
-        return cls(
-            server=parsed.hostname,
-            server_port=parsed.port,
-            uuid=uuid,
-            encryption=encryption,
-            flow=flow,
-            security=security,
-            transport=transport,
-        )
+        try:
+            return cls(
+                server=parsed.hostname,
+                server_port=parsed.port,
+                uuid=uuid,
+                encryption=encryption,
+                flow=flow,
+                security=security,
+                transport=transport,
+            )
+        except ValidationError as e:
+            raise ValueError(f"Validation failed: {e}")
+
