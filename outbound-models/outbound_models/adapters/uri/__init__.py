@@ -15,6 +15,6 @@ def parse(uri: str) -> AnyOutbound:
 
     match parsed.scheme.lower():
         case "vless":
-            VlessOutbound.from_uri(parsed, query)
+            return VlessOutbound.from_uri(parsed, query)
         case _:
             raise ValueError("The string is not an outbound URI, or the library does not yet support this protocol")

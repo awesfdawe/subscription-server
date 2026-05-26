@@ -7,6 +7,8 @@ from .base import BaseOutbound
 from .transports import AnyTransport
 from .security import AnySecurity
 from .security.tls import TlsSecurity
+from .transports.ws import WebsocketTransport
+from .transports.grpc import GrpcTransport
 
 mlkem_encryption_pattern = (
     r"^mlkem768x25519plus\."
@@ -56,8 +58,18 @@ class VlessOutbound(BaseOutbound, tag="vless"):
         match security:
             case "tls" | "reality":
                 security = TlsSecurity.from_uri(query)
-            case _ | "none":
+            case "none" | _:
                 security = None
+
+        transport = query.get("type", [None])[0]
+        
+        match transport:
+            case "ws":
+                transport = WebsocketTransport.from_uri(query)
+            case "grpc":
+                transport = GrpcTransport.from_uri(query)
+            case "tcp" | "raw" | _:
+                transport = None
 
         return cls(
             server=parsed.hostname,
@@ -65,4 +77,6 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             uuid=uuid,
             encryption=encryption,
             flow=flow,
+            security=security,
+            transport=transport
         )
