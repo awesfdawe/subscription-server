@@ -38,7 +38,7 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             raise ValueError("The UUID is missing from the URI")
         try:
             uuid = UUID(parsed.username)
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             raise ValueError("The URI contains an invalid UUID")
 
         if not parsed.hostname:
@@ -85,4 +85,3 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             )
         except ValidationError as e:
             raise ValueError(f"Validation failed: {e}")
-
