@@ -2,7 +2,6 @@ from urllib.parse import urlsplit, parse_qs
 
 from outbound_models.outbounds import AnyOutbound
 from outbound_models.outbounds.vless import VlessOutbound
-from outbound_models.outbounds.hysteria2 import Hysteria2Outbound
 
 
 def parse(uri: str) -> AnyOutbound:

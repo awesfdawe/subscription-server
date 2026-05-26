@@ -62,7 +62,7 @@ class VlessOutbound(BaseOutbound, tag="vless"):
                 security = None
 
         transport = query.get("type", [None])[0]
-        
+
         match transport:
             case "ws":
                 transport = WebsocketTransport.from_uri(query)
@@ -78,5 +78,5 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             encryption=encryption,
             flow=flow,
             security=security,
-            transport=transport
+            transport=transport,
         )

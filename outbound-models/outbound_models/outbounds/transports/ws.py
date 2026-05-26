@@ -13,6 +13,4 @@ class WebsocketTransport(BaseTransport, tag="websocket"):
     def from_uri(cls, query: dict[str, list[str]]) -> Self:
         path = query.get("path", [None])[0]
 
-        return cls (
-            path=path
-        )
+        return cls(path=path)

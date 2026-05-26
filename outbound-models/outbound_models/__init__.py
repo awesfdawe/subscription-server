@@ -12,6 +12,6 @@ class Outbound:
 
     def __getattr__(self, name: str):
         return getattr(self._inner, name)
-    
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(inner={self._inner!r})"
