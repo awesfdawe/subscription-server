@@ -9,14 +9,10 @@ utls_fingerprints = Literal[
 ]
 
 
-class EchOptions(Struct):
-    config_path: str | None = None
-    query_server_name: str | None = None
-
-
 class RealityOptions(Struct):
     public_key: str
     short_id: str | None = None
+    spider_x: str | None = None
 
     @classmethod
     def from_uri(cls, query: dict[str, list[str]]) -> Self:
@@ -27,7 +23,12 @@ class RealityOptions(Struct):
 
         short_id = query.get("sid", [None])[0]
 
-        return cls(public_key=public_key, short_id=short_id)
+        spider_x = query.get("spx", [None])[0]
+
+        if spider_x == "/":
+            spider_x = None
+
+        return cls(public_key=public_key, short_id=short_id, spider_x=spider_x)
 
 
 class TlsSecurity(BaseSecurity, tag="tls"):
@@ -35,7 +36,6 @@ class TlsSecurity(BaseSecurity, tag="tls"):
     fingerprint: utls_fingerprints | None = None
     alpn: list[str] | None = None
     insecure: bool | None = None
-    ech: EchOptions | None = None
     reality: RealityOptions | None = None
 
     @classmethod
