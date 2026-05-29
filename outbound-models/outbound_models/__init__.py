@@ -6,3 +6,6 @@ class Outbound:
     @staticmethod
     def from_uri(uri_string: str) -> AnyOutbound:
         return uri_adapter.parse(uri_string)
+
+    def to_uri(self) -> str:
+        return self.to_uri()

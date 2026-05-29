@@ -1,7 +1,7 @@
 from typing import Annotated, Literal, Self, get_args, cast
 from msgspec import Meta
 from uuid import UUID
-from urllib.parse import SplitResult
+from urllib.parse import SplitResult, urlunsplit, urlencode, quote
 
 from .base import BaseOutbound
 from .transports import AnyTransport
@@ -75,4 +75,28 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             flow=flow,
             security=security,
             transport=transport,
+        )
+
+    def to_uri(self) -> str:
+        netloc = f"{self.uuid}@{self.server}:{self.server_port}"
+
+        query_params = {}
+
+        if self.encryption:
+            query_params.update({"encryption": self.encryption})
+
+        if self.flow:
+            query_params.update({"flow": self.flow})
+
+        if self.security:
+            query_params.update(self.security.to_uri())
+
+        if self.transport:
+            query_params.update(self.transport.to_uri())
+        else:
+            query_params.update({"type": "tcp"})
+        query_string = urlencode(query_params)
+
+        return urlunsplit(
+            SplitResult(scheme="vless", netloc=netloc, path="", query=query_string, fragment=quote(self.tag))
         )

@@ -14,3 +14,11 @@ class WebsocketTransport(BaseTransport, tag="websocket"):
         path = query.get("path", [None])[0]
 
         return cls(path=path)
+
+    def to_uri(self) -> dict[str, str]:
+        query_params = {}
+
+        if self.path:
+            query_params.update({"path": self.path})
+
+        return query_params

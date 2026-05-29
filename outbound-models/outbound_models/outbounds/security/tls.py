@@ -30,6 +30,21 @@ class RealityOptions(Struct):
 
         return cls(public_key=public_key, short_id=short_id, spider_x=spider_x)
 
+    def to_uri(self) -> dict[str, str]:
+        query_params = {}
+
+        query_params.update({"security": "reality"})
+
+        query_params.update({"pbk": self.public_key})
+
+        if self.short_id:
+            query_params.update({"sid": self.short_id})
+
+        if self.spider_x:
+            query_params.update({"spx": self.spider_x})
+
+        return query_params
+
 
 class TlsSecurity(BaseSecurity, tag="tls"):
     server_name: str | None = None
@@ -76,3 +91,25 @@ class TlsSecurity(BaseSecurity, tag="tls"):
             reality = None
 
         return cls(server_name=server_name, fingerprint=fingerprint, alpn=alpn, insecure=insecure, reality=reality)
+
+    def to_uri(self) -> dict[str, str]:
+        query_params = {}
+
+        if self.server_name:
+            query_params.update({"sni": self.server_name})
+
+        if self.fingerprint:
+            query_params.update({"fp": self.fingerprint})
+
+        if self.alpn:
+            query_params.update({"alpn": ",".join(self.alpn)})
+
+        if self.insecure:
+            query_params.update({"insecure": str(int(self.insecure))})
+
+        if self.reality:
+            query_params.update(self.reality.to_uri())
+        else:
+            query_params.update({"security": "tls"})
+
+        return query_params

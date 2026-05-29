@@ -15,3 +15,11 @@ class GrpcTransport(BaseTransport, tag="grpc"):
         service_name = query.get("serviceName", [None])[0]
 
         return cls(service_name=service_name)
+
+    def to_uri(self) -> dict[str, str]:
+        query_params = {}
+
+        if self.service_name:
+            query_params.update({"serviceName": self.service_name})
+
+        return query_params
