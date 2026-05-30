@@ -326,3 +326,4 @@ vless://00000000-0000-0000-0000-000000000000@example.com:443?security=reality&en
 vless://00000000-0000-0000-0000-000000000000@example.com:2053?type=ws&security=tls&sni=example.com&host=example.com&alpn=h3%2Ch2%2Chttp%2F1.1#vless%20tls%20ws%2061
 vless://00000000-0000-0000-0000-000000000000@example.com:443?encryption=none&security=reality&sni=example.com&fp=chrome&pbk=0000000000000000000000000000000000000000000&sid=00&type=xhttp&path=%2F&mode=auto#vless%20reality%20xhttp%2015
 vless://00000000-0000-0000-0000-000000000000@example.com:2096?encryption=none&security=tls&sni=example.com&fp=randomized&insecure=0&allowInsecure=0&type=ws&host=example.com&path=%2F#vless%20tls%20ws%2062
+hysteria2://letmein@example.com:123,5000-6000/?insecure=1&obfs=salamander&obfs-password=gawrgura&pinSHA256=deadbeef&sni=real.example.com

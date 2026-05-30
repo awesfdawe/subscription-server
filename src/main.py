@@ -1,7 +1,7 @@
 from outbound_models import Outbound
 
 outbound = Outbound.from_uri(
-    "vless://00000000-0000-0000-0000-000000000000@example.com:8443?type=tcp&security=reality&flow=xtls-rprx-vision&fp=chrome&pbk=0000000000000000000000000000000000000000000&sid=0000000000000000&sni=example.com#vless%20reality%20vision%20tcp%202"
+    "hysteria2://letmein@example.com:123,5000-6000/?insecure=1&obfs=salamander&obfs-password=gawrgura&pinSHA256=deadbeef&sni=real.example.com#test"
 )
 
-print(outbound.to_uri())
+print(outbound)
