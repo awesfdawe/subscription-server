@@ -18,7 +18,7 @@ def link(request: pytest.FixtureRequest):
     return request.param
 
 
-def test_links(link: str) -> None:
+def test_from_uri_on_valid_links(link: str) -> None:
     outbound = Outbound.from_uri(link)
 
     assert isinstance(outbound, AnyOutbound)

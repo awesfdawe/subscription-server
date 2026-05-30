@@ -81,6 +81,7 @@ class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
             server_ports = ports_list[1]
         else:
             server_port = ports_list[0]
+            server_ports = None
 
         tls = TlsOptions.from_uri(query)
 
@@ -96,6 +97,8 @@ class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
                     obfuscation = GeckoOptions(obfs_password)
                 case _:
                     obfuscation = None
+        else:
+            obfuscation = None
 
         return cls(
             server=parsed.hostname,
