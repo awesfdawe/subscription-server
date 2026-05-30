@@ -22,6 +22,6 @@ def test_from_uri_on_valid_links(link: str) -> None:
     outbound = Outbound.from_uri(link)
 
     assert isinstance(outbound, AnyOutbound)
-    assert outbound.server is not None
-    assert outbound.server_port is not None
-    assert outbound.tag is not None
+    assert outbound.server
+    assert outbound.server_port
+    assert outbound.tag
