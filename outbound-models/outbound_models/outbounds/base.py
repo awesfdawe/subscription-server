@@ -2,7 +2,7 @@ from urllib.parse import SplitResult, unquote
 from typing import Annotated, NamedTuple
 from msgspec import Struct, Meta
 
-from .exceptions import MissingHostnameError, MissingPortError, MissingTagError
+from .exceptions import MissingHostError, MissingPortError, MissingTagError
 
 
 class ParsedBaseData(NamedTuple):
@@ -22,12 +22,12 @@ class BaseOutbound(Struct, tag_field="type", kw_only=True):
     @classmethod
     def _base_parse_uri(cls, parsed: SplitResult) -> ParsedBaseData:
         if not parsed.hostname:
-            raise MissingHostnameError("The hostname is missing from the URI")
+            raise MissingHostError()
 
         if parsed.port is None:
-            raise MissingPortError("The port is missing from the URI")
+            raise MissingPortError()
 
         if not parsed.fragment:
-            raise MissingTagError("The tag is missing from the URI")
+            raise MissingTagError()
 
         return ParsedBaseData(unquote(parsed.fragment), parsed.hostname, parsed.port)

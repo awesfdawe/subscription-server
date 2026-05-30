@@ -20,7 +20,7 @@ class RealityOptions(Struct):
         public_key = query.get("pbk", [None])[0]
 
         if not public_key:
-            raise MissingPublicKeyError("The URI contains the reality parameter but lacks a public key")
+            raise MissingPublicKeyError()
 
         short_id = query.get("sid", [None])[0]
 

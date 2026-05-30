@@ -3,7 +3,7 @@ from typing import Annotated, Self
 from msgspec import Meta, ValidationError, Struct
 
 from .base import BaseOutbound
-from .exceptions import MissingHostnameError, MissingPasswordError
+from .exceptions import MissingHostError, MissingCredentialsError
 
 
 class SalamanderOptions(Struct, tag="salamander"):
@@ -66,14 +66,14 @@ class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
     @classmethod
     def from_uri(cls, parsed: SplitResult, query: dict[str, list[str]]) -> Self:
         if not parsed.hostname:
-            raise MissingHostnameError("Hostname is missing from the URI")
+            raise MissingHostError()
 
         if parsed.username and parsed.password:
             password = f"{parsed.username}:{parsed.password}"
         elif parsed.username:
             password = parsed.username
         else:
-            raise MissingPasswordError("The password is missing from the URI")
+            raise MissingCredentialsError()
 
         raw_port = parsed.netloc.split("@")[-1].rsplit(":", 1)[1]
         ports_list = raw_port.split(",")

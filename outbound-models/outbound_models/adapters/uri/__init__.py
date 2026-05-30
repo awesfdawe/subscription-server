@@ -1,6 +1,6 @@
 from urllib.parse import urlsplit, parse_qs
 
-from outbound_models.outbounds.exceptions import NotSupportedError, InvalidUri
+from outbound_models.outbounds.exceptions import UnsupportedProtocolError, InvalidURIError
 from outbound_models.outbounds import AnyOutbound
 from outbound_models.outbounds.vless import VlessOutbound
 from outbound_models.outbounds.hysteria2 import Hysteria2Outbound
@@ -10,7 +10,7 @@ def parse(uri: str) -> AnyOutbound:
     parsed = urlsplit(uri)
 
     if not parsed.scheme or not parsed.netloc:
-        raise InvalidUri("The string is not a valid URI")
+        raise InvalidURIError()
 
     query = parse_qs(parsed.query)
 
@@ -20,6 +20,4 @@ def parse(uri: str) -> AnyOutbound:
         case "hysteria2" | "hy2":
             return Hysteria2Outbound.from_uri(parsed, query)
         case _:
-            raise NotSupportedError(
-                "The string is not an outbound URI, or the library does not yet support this protocol"
-            )
+            raise UnsupportedProtocolError()
