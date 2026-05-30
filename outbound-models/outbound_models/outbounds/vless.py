@@ -1,10 +1,10 @@
 from typing import Annotated, Literal, Self, get_args, cast
 from msgspec import Meta
 from uuid import UUID
-from urllib.parse import SplitResult, urlunsplit, urlencode, quote
+from urllib.parse import SplitResult, urlunsplit, urlencode, quote, unquote
 
 from .base import BaseOutbound
-from .exceptions import MissingCredentialsError
+from .exceptions import MissingParameterError
 from .transports import AnyTransport
 from .security import AnySecurity
 from .security.tls import TlsSecurity
@@ -34,11 +34,7 @@ class VlessOutbound(BaseOutbound, tag="vless"):
     @classmethod
     def from_uri(cls, parsed: SplitResult, query: dict[str, list[str]]) -> Self:
         if not parsed.username:
-            raise MissingCredentialsError("The UUID is missing from the URI")
-        try:
-            uuid = UUID(parsed.username)
-        except ValueError, TypeError:
-            raise MissingCredentialsError("The URI contains an invalid UUID")
+            raise MissingParameterError("The UUID is missing from the URI")
 
         raw_encryption = query.get("encryption", [None])[0]
 
@@ -66,11 +62,23 @@ class VlessOutbound(BaseOutbound, tag="vless"):
             case "tcp" | "raw" | _:
                 transport = None
 
-        base_data = cls._base_parse_uri(parsed)
+        if not parsed.hostname:
+            raise MissingParameterError("The hostname is missing from the URI")
+
+        if not parsed.port:
+            raise MissingParameterError("The port is missing from the URI")
+
+        if not parsed.username:
+            raise MissingParameterError("The UUID is missing from the URI")
+        try:
+            uuid = UUID(parsed.username)
+        except ValueError, TypeError:
+            raise MissingParameterError("The URI contains an invalid UUID")
+
         return cls(
-            server=base_data.server,
-            server_port=base_data.server_port,
-            tag=base_data.tag,
+            server=parsed.hostname,
+            server_port=parsed.port,
+            tag=unquote(parsed.fragment),
             uuid=uuid,
             encryption=encryption,
             flow=flow,

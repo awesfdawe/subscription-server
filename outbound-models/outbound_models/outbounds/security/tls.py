@@ -2,7 +2,7 @@ from typing import Literal, Self, get_args, cast
 from msgspec import Struct
 
 from .base import BaseSecurity
-from ..exceptions import MissingPublicKeyError
+from ..exceptions import MissingParameterError
 
 
 utls_fingerprints = Literal[
@@ -20,7 +20,7 @@ class RealityOptions(Struct):
         public_key = query.get("pbk", [None])[0]
 
         if not public_key:
-            raise MissingPublicKeyError()
+            raise MissingParameterError("The public key is missing from the URI")
 
         short_id = query.get("sid", [None])[0]
 
