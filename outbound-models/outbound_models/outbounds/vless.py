@@ -4,6 +4,7 @@ from uuid import UUID
 from urllib.parse import SplitResult, urlunsplit, urlencode, quote
 
 from .base import BaseOutbound
+from .exceptions import MissingPasswordError
 from .transports import AnyTransport
 from .security import AnySecurity
 from .security.tls import TlsSecurity
@@ -33,11 +34,11 @@ class VlessOutbound(BaseOutbound, tag="vless"):
     @classmethod
     def from_uri(cls, parsed: SplitResult, query: dict[str, list[str]]) -> Self:
         if not parsed.username:
-            raise ValueError("The UUID is missing from the URI")
+            raise MissingPasswordError("The UUID is missing from the URI")
         try:
             uuid = UUID(parsed.username)
         except ValueError, TypeError:
-            raise ValueError("The URI contains an invalid UUID")
+            raise MissingPasswordError("The URI contains an invalid UUID")
 
         raw_encryption = query.get("encryption", [None])[0]
 

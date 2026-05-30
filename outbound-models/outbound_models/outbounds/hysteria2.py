@@ -1,8 +1,9 @@
-from urllib.parse import SplitResult
+from urllib.parse import SplitResult, unquote
 from typing import Annotated, Self
 from msgspec import Meta, ValidationError, Struct
 
 from .base import BaseOutbound
+from .exceptions import MissingHostnameError, MissingPasswordError
 
 
 class SalamanderOptions(Struct, tag="salamander"):
@@ -65,14 +66,14 @@ class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
     @classmethod
     def from_uri(cls, parsed: SplitResult, query: dict[str, list[str]]) -> Self:
         if not parsed.hostname:
-            raise ValueError("Hostname is missing from the URI")
+            raise MissingHostnameError("Hostname is missing from the URI")
 
         if parsed.username and parsed.password:
             password = f"{parsed.username}:{parsed.password}"
         elif parsed.username:
             password = parsed.username
         else:
-            raise ValueError("The password is missing from the URI")
+            raise MissingPasswordError("The password is missing from the URI")
 
         raw_port = parsed.netloc.split("@")[-1].rsplit(":", 1)[1]
         ports_list = raw_port.split(",")
@@ -104,7 +105,7 @@ class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
             server=parsed.hostname,
             server_port=int(server_port),
             server_ports=server_ports,
-            tag=parsed.fragment,
+            tag=unquote(parsed.fragment),
             password=password,
             obfuscation=obfuscation,
             tls=tls,
