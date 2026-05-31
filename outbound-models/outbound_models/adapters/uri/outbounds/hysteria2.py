@@ -1,29 +1,15 @@
+from functools import partial
 from urllib.parse import SplitResult, unquote
 
 from outbound_models.exceptions import MissingParameterError
 from outbound_models.models.outbounds.hysteria2 import TlsOptions, Hysteria2Outbound, SalamanderOptions, GeckoOptions
 
-
-def tls_from_uri(query: dict[str, list[str]]) -> TlsOptions:
-    server_name = query.get("sni", [None])[0]
-
-    insecure = query.get("insecure", [None])[0]
-
-    if insecure is not None:
-        match insecure:
-            case "1":
-                insecure = True
-            case "0":
-                insecure = False
-            case _:
-                insecure = None
-
-    pin_sha256 = query.get("pinSHA256", [None])[0]
-
-    return TlsOptions(server_name=server_name, insecure=insecure, pin_sha256=pin_sha256)
+from ..utils import _get_param
 
 
-def from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outbound:
+def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outbound:
+    get_param = partial(_get_param, query)
+
     if not parsed.hostname:
         raise MissingParameterError("The hostname is missing from the URI")
 
@@ -36,29 +22,38 @@ def from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outbo
 
     raw_port = parsed.netloc.split("@")[-1].rsplit(":", 1)[1]
     ports_list = raw_port.split(",")
-    if len(ports_list) == 2:
-        server_port = ports_list[0]
-        server_ports = ports_list[1]
-    else:
-        server_port = ports_list[0]
-        server_ports = None
+    match len(ports_list):
+        case 2:
+            server_port = ports_list[0]
+            server_ports = ports_list[1]
+        case 1:
+            server_port = ports_list[0]
+            server_ports = None
+        case _:
+            raise MissingParameterError("Port is missing from the URI")
 
-    tls = tls_from_uri(query)
+    server_name = get_param("sni")
+    pin_sha256 = get_param("pinSHA256")
+    match get_param("insecure"):
+        case "1":
+            insecure = True
+        case "0":
+            insecure = False
+        case _:
+            insecure = None
 
-    obfs_password = query.get("obfs-password", [None])[0]
+    tls_params = {"server_name": server_name, "insecure": insecure, "pin_sha256": pin_sha256}
+    tls = TlsOptions(**tls_params) if any(tls_params.values()) else None
 
+    obfs_password = get_param("obfs-password")
+
+    obfuscation = None
     if obfs_password is not None:
-        obfuscation = query.get("obfs", [None])[0]
-
-        match obfuscation:
+        match get_param("obfs"):
             case "salamander":
                 obfuscation = SalamanderOptions(obfs_password)
             case "gecko":
                 obfuscation = GeckoOptions(obfs_password)
-            case _:
-                obfuscation = None
-    else:
-        obfuscation = None
 
     return Hysteria2Outbound(
         server=parsed.hostname,

@@ -1,13 +1,13 @@
 from outbound_models.models.transports.ws import WebsocketTransport
 
-
-def from_uri(query: dict[str, list[str]]) -> WebsocketTransport:
-    path = query.get("path", [None])[0]
-
-    return WebsocketTransport(path=path)
+from ..utils import _get_param
 
 
-def to_uri(ws: WebsocketTransport) -> dict[str, str]:
+def _from_uri(query: dict[str, list[str]]) -> WebsocketTransport:
+    return WebsocketTransport(path=_get_param(query, "path"))
+
+
+def _to_uri(ws: WebsocketTransport) -> dict[str, str]:
     query_params = {}
 
     if ws.path:

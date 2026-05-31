@@ -1,97 +1,77 @@
+from functools import partial
 from typing import get_args, cast
 
 from outbound_models.exceptions import MissingParameterError
 from outbound_models.models.security.tls import RealityOptions, TlsSecurity, utls_fingerprints
 
-
-def reality_from_uri(query: dict[str, list[str]]) -> RealityOptions:
-    public_key = query.get("pbk", [None])[0]
-
-    if not public_key:
-        raise MissingParameterError("The public key is missing from the URI")
-
-    short_id = query.get("sid", [None])[0]
-
-    spider_x = query.get("spx", [None])[0]
-
-    if spider_x == "/":
-        spider_x = None
-
-    return RealityOptions(public_key=public_key, short_id=short_id, spider_x=spider_x)
+from ..utils import _get_param
 
 
-def reality_to_uri(reality: RealityOptions) -> dict[str, str]:
-    query_params = {}
+def _from_uri(query: dict[str, list[str]]) -> TlsSecurity:
+    get_param = partial(_get_param, query)
 
-    query_params.update({"security": "reality"})
+    reality = None
+    if get_param("security") == "reality":
+        public_key = get_param("pbk")
+        if not public_key:
+            raise MissingParameterError("Public key is missing from the URI")
 
-    query_params.update({"pbk": reality.public_key})
+        spider_x = get_param("spx")
+        reality = RealityOptions(
+            public_key=public_key,
+            short_id=get_param("sid"),
+            spider_x=None if spider_x == "/" else spider_x,
+        )
 
-    if reality.short_id:
-        query_params.update({"sid": reality.short_id})
-
-    if reality.spider_x:
-        query_params.update({"spx": reality.spider_x})
-
-    return query_params
-
-
-def from_uri(query: dict[str, list[str]]) -> TlsSecurity:
-    server_name = query.get("sni", [None])[0]
-
-    raw_fingerprint = query.get("fp", [None])[0]
-
+    fingerprint = get_param("fp")
     fingerprint = cast(
-        utls_fingerprints | None, raw_fingerprint if raw_fingerprint in get_args(utls_fingerprints) else None
+        utls_fingerprints | None,
+        fingerprint if fingerprint in get_args(utls_fingerprints) else None,
     )
 
-    alpn = query.get("alpn", [None])[0]
-
+    alpn = get_param("alpn")
     if alpn:
         alpn = alpn.split(",")
     else:
         alpn = None
 
-    insecure = query.get("insecure") or query.get("allowInsecure") or [None]
+    insecure = get_param("insecure") or get_param("allowInsecure")
+    match insecure:
+        case "1":
+            insecure = True
+        case "0":
+            insecure = False
+        case _:
+            insecure = None
 
-    insecure = insecure[0]
-
-    if insecure is not None:
-        match insecure:
-            case "1":
-                insecure = True
-            case "0":
-                insecure = False
-            case _:
-                insecure = None
-
-    reality = query.get("security", [None])[0]
-
-    if reality == "reality":
-        reality = reality_from_uri(query)
-    else:
-        reality = None
-
-    return TlsSecurity(server_name=server_name, fingerprint=fingerprint, alpn=alpn, insecure=insecure, reality=reality)
+    return TlsSecurity(
+        server_name=get_param("sni"),
+        fingerprint=fingerprint,
+        alpn=alpn,
+        insecure=insecure,
+        reality=reality,
+    )
 
 
-def to_uri(tls: TlsSecurity) -> dict[str, str]:
+def _to_uri(tls: TlsSecurity) -> dict[str, str]:
     query_params = {}
 
     if tls.server_name:
         query_params.update({"sni": tls.server_name})
-
     if tls.fingerprint:
         query_params.update({"fp": tls.fingerprint})
-
     if tls.alpn:
         query_params.update({"alpn": ",".join(tls.alpn)})
-
     if tls.insecure:
         query_params.update({"insecure": str(int(tls.insecure))})
-
     if tls.reality:
-        query_params.update(reality_to_uri(tls.reality))
+        query_params.update({"security": "reality"})
+        query_params.update({"pbk": tls.reality.public_key})
+
+        if tls.reality.short_id:
+            query_params.update({"sid": tls.reality.short_id})
+        if tls.reality.spider_x:
+            query_params.update({"spx": tls.reality.spider_x})
     else:
         query_params.update({"security": "tls"})
 

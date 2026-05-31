@@ -1,13 +1,13 @@
 from outbound_models.models.transports.grpc import GrpcTransport
 
-
-def from_uri(query: dict[str, list[str]]) -> GrpcTransport:
-    service_name = query.get("serviceName", [None])[0]
-
-    return GrpcTransport(service_name=service_name)
+from ..utils import _get_param
 
 
-def to_uri(grpc: GrpcTransport) -> dict[str, str]:
+def _from_uri(query: dict[str, list[str]]) -> GrpcTransport:
+    return GrpcTransport(service_name=_get_param(query, "serviceName"))
+
+
+def _to_uri(grpc: GrpcTransport) -> dict[str, str]:
     query_params = {}
 
     if grpc.service_name:

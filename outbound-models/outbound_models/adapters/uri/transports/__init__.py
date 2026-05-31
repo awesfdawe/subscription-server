@@ -5,9 +5,9 @@ from outbound_models.models.transports import AnyTransport
 from . import grpc, ws
 
 
-def to_uri(transport: AnyTransport) -> dict[str, str]:
+def _to_uri(transport: AnyTransport) -> dict[str, str]:
     match transport:
         case GrpcTransport():
-            return grpc.to_uri(transport)
+            return grpc._to_uri(transport)
         case WebsocketTransport():
-            return ws.to_uri(transport)
+            return ws._to_uri(transport)

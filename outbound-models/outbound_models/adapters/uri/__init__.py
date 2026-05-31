@@ -11,9 +11,9 @@ def from_uri(uri: str) -> AnyOutbound:
 
     match parsed.scheme.lower():
         case "vless":
-            return vless.from_uri(parsed, query)
+            return vless._from_uri(parsed, query)
         case "hysteria2" | "hy2":
-            return hysteria2.from_uri(parsed, query)
+            return hysteria2._from_uri(parsed, query)
         case _:
             raise UnsupportedProtocolError()
 
