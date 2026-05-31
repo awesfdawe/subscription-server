@@ -1,7 +1,7 @@
 from hypothesis import given, provisional as st
 
 from outbound_models import Outbound
-from outbound_models.outbounds.exceptions import OutboundError
+from outbound_models.exceptions import OutboundError
 
 
 @given(st.urls())

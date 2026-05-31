@@ -3,7 +3,7 @@ from pathlib import Path
 from urllib.parse import unquote
 
 from outbound_models import Outbound
-from outbound_models.outbounds import AnyOutbound
+from outbound_models.models.outbounds import AnyOutbound
 
 fixture_path = Path(__file__).parent / "fixtures" / "fake_valid_links.txt"
 

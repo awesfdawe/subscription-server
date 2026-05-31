@@ -9,6 +9,10 @@ class OutboundError(ValueError):
         return self.message
 
 
+class InputValidationError(OutboundError):
+    message: str = "Input data did not pass validation"
+
+
 class MissingParameterError(OutboundError):
     message: str = "Required parameter is missing from the input data"
 
