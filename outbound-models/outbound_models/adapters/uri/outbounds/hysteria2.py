@@ -13,8 +13,10 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
     if not parsed.hostname:
         raise MissingParameterError("The hostname is missing from the URI")
 
+    username = None
     if parsed.username and parsed.password:
-        password = f"{parsed.username}:{parsed.password}"
+        username = parsed.username
+        password = parsed.password
     elif parsed.username:
         password = parsed.username
     else:
@@ -61,6 +63,7 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
         server_ports=server_ports,
         tag=unquote(parsed.fragment),
         password=password,
+        username=username,
         obfuscation=obfuscation,
         tls=tls,
     )

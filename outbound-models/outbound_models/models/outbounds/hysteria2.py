@@ -27,6 +27,7 @@ class TlsOptions(Struct):
 class Hysteria2Outbound(BaseOutbound, tag="hysteria2"):
     password: str
 
+    username: str | None = None
     server_ports: Annotated[str, Meta(pattern=r"^\d{1,5}-\d{1,5}$")] | None = None
     up_mbps: int | None = None
     down_mbps: int | None = None

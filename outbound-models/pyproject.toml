@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "msgspec>=0.21.1",
+    "yarl>=1.24.2",
 ]
 
 [tool.ruff]
