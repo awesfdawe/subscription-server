@@ -34,7 +34,7 @@ def from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> VlessOutbound:
 
     match transport:
         case "ws":
-            transport = transports.grpc.from_uri(query)
+            transport = transports.ws.from_uri(query)
         case "grpc":
             transport = transports.grpc.from_uri(query)
         case "tcp" | "raw" | _:

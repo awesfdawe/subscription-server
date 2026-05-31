@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 from urllib.parse import unquote
 
-from outbound_models import Outbound
+from outbound_models.adapters.uri import from_uri
 from outbound_models.models.outbounds import AnyOutbound
 
 fixture_path = Path(__file__).parent / "fixtures" / "fake_valid_links.txt"
@@ -19,7 +19,7 @@ def link(request: pytest.FixtureRequest):
 
 
 def test_from_uri_on_valid_links(link: str) -> None:
-    outbound = Outbound.from_uri(link)
+    outbound = from_uri(link)
 
     assert isinstance(outbound, AnyOutbound)
     assert outbound.server

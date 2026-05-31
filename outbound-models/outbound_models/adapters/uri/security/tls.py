@@ -88,7 +88,7 @@ def to_uri(tls: TlsSecurity) -> dict[str, str]:
         query_params.update({"alpn": ",".join(tls.alpn)})
 
     if tls.insecure:
-        query_params.update({"insecure": str(bool(int(tls.insecure)))})
+        query_params.update({"insecure": str(int(tls.insecure))})
 
     if tls.reality:
         query_params.update(reality_to_uri(tls.reality))
