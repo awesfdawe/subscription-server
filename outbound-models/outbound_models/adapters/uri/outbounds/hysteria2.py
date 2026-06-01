@@ -71,9 +71,9 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
     if obfs_password is not None:
         match get_param("obfs"):
             case "salamander":
-                obfuscation = SalamanderOptions(obfs_password)
+                obfuscation = SalamanderOptions(password=obfs_password)
             case "gecko":
-                obfuscation = GeckoOptions(obfs_password)
+                obfuscation = GeckoOptions(password=obfs_password)
 
     return Hysteria2Outbound(
         server=parsed.hostname,

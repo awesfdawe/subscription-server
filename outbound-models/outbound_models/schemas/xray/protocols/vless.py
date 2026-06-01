@@ -7,7 +7,7 @@ from outbound_models.models.outbounds.base import ServerPort
 from .base import BaseProtocolXray
 
 
-class VlessXray(BaseProtocolXray, tag="vless"):
+class VlessXray(BaseProtocolXray, tag="vless", kw_only=True):
     address: str
     port: ServerPort
     id: UUID
