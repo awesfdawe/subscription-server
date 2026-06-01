@@ -1,10 +1,12 @@
 import msgspec
 
+from .base import BaseTransportXray
 
-class MasqueradeOptions(msgspec.Struct):
+
+class MasqueradeOptionsXray(msgspec.Struct):
     insecure: bool | None = None
 
 
-class Hysteria2Transport(msgspec.Struct):
+class Hysteria2TransportXray(BaseTransportXray):
     auth: str
-    masquerade: MasqueradeOptions | None = None
+    masquerade: MasqueradeOptionsXray | None = None

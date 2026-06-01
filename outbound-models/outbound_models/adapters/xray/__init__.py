@@ -4,7 +4,7 @@ from outbound_models.exceptions import UnsupportedProtocolError, InputParsingErr
 from outbound_models.models.outbounds import AnyOutbound
 
 from .outbounds import vless, hysteria2
-from .schemas.xray import XrayConfig
+from outbound_models.schemas.xray import XrayConfig
 
 
 def from_xray(xray_json: str) -> AnyOutbound:

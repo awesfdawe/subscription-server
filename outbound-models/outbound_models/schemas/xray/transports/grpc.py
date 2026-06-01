@@ -1,7 +1,9 @@
 import msgspec
 
+from .base import BaseTransportXray
 
-class GrpcTransport(msgspec.Struct):
+
+class GrpcTransportXray(BaseTransportXray):
     service_name: str | None = msgspec.field(default=None, name="serviceName")
     idle_timeout: int | None = None
     health_check_timeout: int | None = None

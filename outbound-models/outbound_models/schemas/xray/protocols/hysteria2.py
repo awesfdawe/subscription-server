@@ -1,8 +1,8 @@
 from outbound_models.models.outbounds.base import ServerPort
 
-from .base import BaseProtocol
+from .base import BaseProtocolXray
 
 
-class Hysteria2Protocol(BaseProtocol, tag="hysteria"):
+class Hysteria2Xray(BaseProtocolXray, tag="hysteria"):
     address: str
     port: ServerPort

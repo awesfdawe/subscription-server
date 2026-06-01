@@ -2,9 +2,11 @@ import msgspec
 from typing import Literal
 
 from .protocols import AnyProtocol
-from .transports.grpc import GrpcTransport
-from .transports.ws import WebsocketTransport
-from .transports.hysteria2 import Hysteria2Transport
+from .transports.grpc import GrpcTransportXray
+from .transports.ws import WebsocketTransportXray
+from .transports.hysteria2 import Hysteria2TransportXray
+from .security.reality import RealitySecurityXray
+from .security.tls import TlsSecurityXray
 
 NetworkValues = Literal["raw", "tcp", "xhttp", "mkcp", "grpc", "websocket", "httpupgrade", "hysteria"]
 SecurityValues = Literal["none", "reality", "tls"]
@@ -12,10 +14,12 @@ SecurityValues = Literal["none", "reality", "tls"]
 
 class StreamSettings(msgspec.Struct, rename="camel"):
     network: NetworkValues
-    grpc_settings: GrpcTransport | None = None
-    ws_settings: WebsocketTransport | None = None
-    hysteria_settings: Hysteria2Transport | None = None
+    grpc_settings: GrpcTransportXray | None = None
+    ws_settings: WebsocketTransportXray | None = None
+    hysteria_settings: Hysteria2TransportXray | None = None
     security: SecurityValues | None = None
+    reality_settings: RealitySecurityXray | None = None
+    tls_settings: TlsSecurityXray | None = None
 
 
 XrayProtocols = Literal[

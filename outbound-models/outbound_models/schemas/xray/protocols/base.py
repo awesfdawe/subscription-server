@@ -1,5 +1,5 @@
 import msgspec
 
 
-class BaseProtocol(msgspec.Struct, tag_field="protocol"):
+class BaseProtocolXray(msgspec.Struct, tag_field="protocol", kw_only=True):
     pass

@@ -1,14 +1,11 @@
-from typing import Any
-from functools import partial
-
 from outbound_models.models.transports.grpc import GrpcTransport
+from outbound_models.schemas.xray.transports.grpc import GrpcTransportXray
 
-# from ..utils import _get_param
 
-
-# def _from_xray(grpc_settings: dict[str, Any]) -> GrpcTransport:
-#     get_param = partial(_get_param, grpc_settings)
-
-#     return GrpcTransport(
-#         service_name=get_param("service_name"),
-#     )
+def _from_xray(grpc: GrpcTransportXray) -> GrpcTransport:
+    return GrpcTransport(
+        service_name=grpc.service_name,
+        idle_timeout=grpc.idle_timeout,
+        ping_timeout=grpc.health_check_timeout,
+        permit_without_stream=grpc.permit_without_stream,
+    )

@@ -1,6 +1,6 @@
-import msgspec
+from .base import BaseTransportXray
 
 
-class WebsocketTransport(msgspec.Struct):
+class WebsocketTransportXray(BaseTransportXray):
     path: str | None = None
     headers: dict[str, str] | None = None

@@ -1,4 +1,4 @@
-from .vless import VlessProtocol
-from .hysteria2 import Hysteria2Protocol
+from .vless import VlessXray
+from .hysteria2 import Hysteria2Xray
 
-AnyProtocol = VlessProtocol | Hysteria2Protocol
+AnyProtocol = VlessXray | Hysteria2Xray
