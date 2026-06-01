@@ -15,7 +15,7 @@ class RealityOptions(msgspec.Struct, kw_only=True):
     spider_x: str | None = None
 
 
-class TlsSecurity(BaseSecurity, tag="tls", kw_only=True):
+class TlsSecurity(BaseSecurity, kw_only=True):
     server_name: str | None = None
     fingerprint: utls_fingerprints | None = None
     alpn: list[str] | None = None

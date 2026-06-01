@@ -4,11 +4,11 @@ from typing import Annotated
 from .base import BaseOutbound
 
 
-class SalamanderOptions(msgspec.Struct, tag="salamander", kw_only=True):
+class SalamanderOptions(msgspec.Struct, kw_only=True):
     password: str
 
 
-class GeckoOptions(msgspec.Struct, tag="gecko", kw_only=True):
+class GeckoOptions(msgspec.Struct, kw_only=True):
     password: str
 
     min_packet_size: int | None = None
@@ -24,7 +24,7 @@ class TlsOptions(msgspec.Struct, kw_only=True):
     pin_sha256: str | None = None
 
 
-class Hysteria2Outbound(BaseOutbound, tag="hysteria2", kw_only=True):
+class Hysteria2Outbound(BaseOutbound, kw_only=True):
     password: str
 
     username: str | None = None
