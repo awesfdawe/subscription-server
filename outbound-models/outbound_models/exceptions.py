@@ -1,4 +1,4 @@
-class OutboundError(ValueError):
+class OutboundError(Exception):
     message: str = "An outbound error occurred"
 
     def __str__(self) -> str:
@@ -11,6 +11,10 @@ class OutboundError(ValueError):
 
 class InputValidationError(OutboundError):
     message: str = "Input data did not pass validation"
+
+
+class InputParsingError(OutboundError):
+    message: str = "Input data is malformed or could not be parse"
 
 
 class MissingParameterError(OutboundError):
