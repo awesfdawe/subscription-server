@@ -1,5 +1,5 @@
-from msgspec import Struct
+import msgspec
 
 
-class BaseTransport(Struct, tag_field="type", kw_only=True):
+class BaseTransport(msgspec.Struct, tag_field="type", kw_only=True):
     pass

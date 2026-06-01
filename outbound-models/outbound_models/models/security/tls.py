@@ -1,5 +1,5 @@
+import msgspec
 from typing import Literal
-from msgspec import Struct
 
 from .base import BaseSecurity
 
@@ -9,7 +9,7 @@ utls_fingerprints = Literal[
 ]
 
 
-class RealityOptions(Struct):
+class RealityOptions(msgspec.Struct):
     public_key: str
     short_id: str | None = None
     spider_x: str | None = None

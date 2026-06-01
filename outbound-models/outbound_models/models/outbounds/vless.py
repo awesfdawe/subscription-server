@@ -1,5 +1,5 @@
+import msgspec
 from typing import Annotated, Literal
-from msgspec import Meta
 from uuid import UUID
 
 from .base import BaseOutbound
@@ -21,7 +21,7 @@ FlowValues = Literal["xtls-rprx-vision", "xtls-rprx-vision-udp443"]
 class VlessOutbound(BaseOutbound, tag="vless"):
     uuid: UUID
 
-    encryption: Annotated[str, Meta(pattern=mlkem_encryption_pattern)] | None = None
+    encryption: Annotated[str, msgspec.Meta(pattern=mlkem_encryption_pattern)] | None = None
     flow: FlowValues | None = None
     security: AnySecurity | None = None
     transport: AnyTransport | None = None
