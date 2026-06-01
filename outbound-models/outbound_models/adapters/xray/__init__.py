@@ -17,6 +17,6 @@ def from_xray(xray_json: str) -> AnyOutbound:
         case "vless":
             return vless._from_xray(xray)
         case "hysteria":
-            return hysteria2._from_xray()
+            return hysteria2._from_xray(xray)
         case _:
             raise UnsupportedProtocolError()
