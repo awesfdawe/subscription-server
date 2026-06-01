@@ -15,13 +15,15 @@ mlkem_encryption_pattern = (
     r"[A-Za-z0-9+/=_-]+$"
 )
 
+MlkemEncryption = Annotated[str, msgspec.Meta(pattern=mlkem_encryption_pattern)]
+
 FlowValues = Literal["xtls-rprx-vision", "xtls-rprx-vision-udp443"]
 
 
 class VlessOutbound(BaseOutbound, tag="vless"):
     uuid: UUID
 
-    encryption: Annotated[str, msgspec.Meta(pattern=mlkem_encryption_pattern)] | None = None
+    encryption: MlkemEncryption | None = None
     flow: FlowValues | None = None
     security: AnySecurity | None = None
     transport: AnyTransport | None = None

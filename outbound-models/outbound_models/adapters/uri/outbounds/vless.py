@@ -3,7 +3,7 @@ from typing import get_args, cast
 from uuid import UUID
 from urllib.parse import SplitResult, urlunsplit, urlencode, quote, unquote
 
-from outbound_models.exceptions import MissingParameterError
+from outbound_models.exceptions import MissingParameterError, InputValidationError
 from outbound_models.models.outbounds import VlessOutbound
 from outbound_models.models.outbounds.vless import FlowValues
 
@@ -23,13 +23,12 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> VlessOutbound
         raise MissingParameterError("Server is missing from the URI")
     if not parsed.port:
         raise MissingParameterError("Port is missing from the URI")
-    if parsed.username:
-        try:
-            uuid = UUID(parsed.username)
-        except ValueError, TypeError:
-            raise MissingParameterError("URI contains an invalid UUID")
-    else:
+    if not parsed.username:
         raise MissingParameterError("UUID is missing from the URI")
+    try:
+        uuid = UUID(parsed.username)
+    except ValueError, TypeError:
+        raise InputValidationError("URI contains an invalid UUID")
 
     encryption = get_param("encryption")
     if encryption == "None":

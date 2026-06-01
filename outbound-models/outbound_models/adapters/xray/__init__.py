@@ -1,0 +1,22 @@
+import msgspec
+
+from outbound_models.exceptions import UnsupportedProtocolError, InputParsingError
+from outbound_models.models.outbounds import AnyOutbound
+
+from .outbounds import vless, hysteria2
+from .schemas import XrayConfig
+
+
+def from_xray(xray_json: str) -> AnyOutbound:
+    try:
+        xray = msgspec.json.decode(xray_json, type=XrayConfig)
+    except msgspec.DecodeError as e:
+        raise InputParsingError(f"xray json could not be decoded: {e}")
+
+    match xray.protocol:
+        case "vless":
+            return vless._from_xray(xray)
+        case "hysteria":
+            return hysteria2._from_xray()
+        case _:
+            raise UnsupportedProtocolError()
