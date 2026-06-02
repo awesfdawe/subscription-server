@@ -19,5 +19,6 @@ line-length = 120
 dev = [
     "hypothesis>=6.153.0",
     "pytest>=9.0.3",
+    "ruff>=0.15.15",
     "ty>=0.0.40",
 ]

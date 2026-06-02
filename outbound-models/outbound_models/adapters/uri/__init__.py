@@ -27,3 +27,5 @@ def to_uri(outbound: AnyOutbound) -> str:
             return vless._to_uri(outbound)
         case Hysteria2Outbound():
             return hysteria2._to_uri(outbound)
+        case _:
+            raise UnsupportedProtocolError()

@@ -79,6 +79,7 @@ dependencies = [
 dev = [
     { name = "hypothesis" },
     { name = "pytest" },
+    { name = "ruff" },
     { name = "ty" },
 ]
 
@@ -89,6 +90,7 @@ requires-dist = [{ name = "msgspec", extras = ["yaml"], specifier = ">=0.21.1" }
 dev = [
     { name = "hypothesis", specifier = ">=6.153.0" },
     { name = "pytest", specifier = ">=9.0.3" },
+    { name = "ruff", specifier = ">=0.15.15" },
     { name = "ty", specifier = ">=0.0.40" },
 ]
 
