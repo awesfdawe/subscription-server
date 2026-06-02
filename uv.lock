@@ -216,8 +216,8 @@ requires-dist = [{ name = "outbound-models", editable = "outbound-models" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "ruff", specifier = ">=0.15.14" },
-    { name = "ty", specifier = ">=0.0.39" },
+    { name = "ruff", specifier = ">=0.15.15" },
+    { name = "ty", specifier = ">=0.0.40" },
 ]
 
 [[package]]
