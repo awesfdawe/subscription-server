@@ -14,7 +14,7 @@ class InputValidationError(OutboundError):
 
 
 class InputParsingError(OutboundError):
-    message: str = "Input data is malformed or could not be parse"
+    message: str = "Input data is malformed or could not be parsed"
 
 
 class MissingParameterError(OutboundError):
