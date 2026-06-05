@@ -1,6 +1,5 @@
 from outbound_models.schemas.xray import XrayConfig
 from outbound_models.schemas.xray.protocols.hysteria2 import Hysteria2Xray
-from outbound_models.exceptions import OutboundError, MissingParameterError
 from outbound_models.models.outbounds.hysteria2 import Hysteria2Outbound, TlsOptions
 
 
@@ -11,7 +10,7 @@ def _from_xray(xray: XrayConfig) -> Hysteria2Outbound:
         case Hysteria2Xray():
             pass
         case _:
-            raise OutboundError("Wrong settings")
+            raise ValueError("Wrong settings")
 
     hysteria_settings = None
     stream = xray.stream_settings
@@ -21,10 +20,10 @@ def _from_xray(xray: XrayConfig) -> Hysteria2Outbound:
                 if stream.hysteria_settings:
                     hysteria_settings = stream.hysteria_settings
                 else:
-                    raise MissingParameterError("Hysteria2 settings is missing from xray json")
+                    raise ValueError("Hysteria2 settings is missing from xray json")
 
     if not hysteria_settings:
-        raise MissingParameterError("Hysteria2 auth is missing from xray json")
+        raise ValueError("Hysteria2 auth is missing from xray json")
 
     tls = None
     if hysteria_settings.masquerade:

@@ -1,6 +1,5 @@
 from outbound_models.schemas.xray import XrayConfig
 from outbound_models.schemas.xray.protocols.vless import VlessXray
-from outbound_models.exceptions import OutboundError, MissingParameterError
 from outbound_models.models.outbounds.vless import VlessOutbound
 
 from ..transports import grpc, ws
@@ -14,7 +13,7 @@ def _from_xray(xray: XrayConfig) -> VlessOutbound:
         case VlessXray():
             pass
         case _:
-            raise OutboundError("Wrong settings")
+            raise ValueError("Wrong settings")
 
     encryption = settings.encryption
     if encryption == "none":
@@ -37,7 +36,7 @@ def _from_xray(xray: XrayConfig) -> VlessOutbound:
                 if stream.reality_settings:
                     security = tls._from_xray(stream.reality_settings)
                 else:
-                    raise MissingParameterError("Reality settings is missing from xray json")
+                    raise ValueError("Reality settings is missing from xray json")
             case "tls":
                 if stream.tls_settings:
                     security = tls._from_xray(stream.tls_settings)

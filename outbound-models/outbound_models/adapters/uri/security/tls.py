@@ -1,7 +1,6 @@
 from functools import partial
 from typing import get_args, cast
 
-from outbound_models.exceptions import MissingParameterError
 from outbound_models.models.security.tls import RealityOptions, TlsSecurity, utls_fingerprints
 
 from ..utils import _get_param
@@ -14,7 +13,7 @@ def _from_uri(query: dict[str, list[str]]) -> TlsSecurity:
     if get_param("security") == "reality":
         public_key = get_param("pbk")
         if not public_key:
-            raise MissingParameterError("Public key is missing from the URI")
+            raise ValueError("Public key is missing from the URI")
 
         spider_x = get_param("spx")
         reality = RealityOptions(

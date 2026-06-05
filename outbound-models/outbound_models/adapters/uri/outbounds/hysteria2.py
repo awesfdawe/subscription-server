@@ -1,7 +1,6 @@
 from functools import partial
 from urllib.parse import SplitResult, unquote, urlencode, urlunsplit, quote
 
-from outbound_models.exceptions import MissingParameterError, InputParsingError
 from outbound_models.models.outbounds.hysteria2 import TlsOptions, Hysteria2Outbound, SalamanderOptions, GeckoOptions
 
 from ..utils import _get_param
@@ -11,7 +10,7 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
     get_param = partial(_get_param, query)
 
     if not parsed.hostname:
-        raise MissingParameterError("The hostname is missing from the URI")
+        raise ValueError("The hostname is missing from the URI")
 
     username = None
     if parsed.username and parsed.password:
@@ -20,7 +19,7 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
     elif parsed.username:
         password = parsed.username
     else:
-        raise MissingParameterError("No credentials are present in the URI")
+        raise ValueError("No credentials are present in the URI")
 
     server_port = None
     server_ports = None
@@ -28,7 +27,7 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
     try:
         raw_port = parsed.netloc.split("@")[-1].rsplit(":", 1)[1]
     except IndexError:
-        raise MissingParameterError("Port is missing from the URI")
+        raise ValueError("Port is missing from the URI")
 
     port_parts = raw_port.split(",")
     for part in port_parts:
@@ -38,7 +37,7 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
                 start_port = int(bounds[0])
                 int(bounds[1])
             except ValueError, IndexError:
-                raise InputParsingError("Invalid port range format")
+                raise ValueError("Invalid port range format")
 
             if not server_port:
                 server_port = start_port
@@ -47,10 +46,10 @@ def _from_uri(parsed: SplitResult, query: dict[str, list[str]]) -> Hysteria2Outb
         elif part.isdigit():
             server_port = int(part)
         else:
-            raise InputParsingError("Ports cannot be parsed")
+            raise ValueError("Ports cannot be parsed")
 
     if not server_port:
-        raise InputParsingError("Ports cannot be parsed")
+        raise ValueError("Ports cannot be parsed")
 
     server_name = get_param("sni")
     pin_sha256 = get_param("pinSHA256")
