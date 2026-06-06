@@ -1,5 +1,5 @@
 from string import ascii_lowercase, digits
-from urllib.parse import urlencode, urlunsplit, SplitResult
+from urllib.parse import urlencode, urlunsplit, SplitResult, urlsplit
 import pytest
 from pathlib import Path
 from hypothesis import given, settings, strategies as st
@@ -34,14 +34,14 @@ def generated_link(draw):
     scheme = draw(st.sampled_from(["vless", "hysteria2"]))
 
     alphabet = ascii_lowercase + digits
-    uuid = draw(st.one_of(st.uuids().map(str), st.text(alphabet=alphabet, min_size=8, max_size=36)))
 
     host = draw(st.one_of(st.just("example.com"), st.text(alphabet=alphabet, min_size=4, max_size=25)))
 
-    port = draw(st.one_of(st.integers(min_value=0, max_value=65535), st.text(alphabet=digits, min_size=2, max_size=4)))
+    port = draw(st.one_of(st.integers(min_value=1, max_value=65535), st.text(alphabet=digits, min_size=2, max_size=4)))
 
     match scheme:
         case "vless":
+            uuid = draw(st.one_of(st.uuids().map(str)))
             possible_params = {
                 "security": ["none", "tls", "reality", "weowewe"],
                 "flow": ["xtls-rprx-vision", "xtls-rprx-vision-udp443", "none"],
@@ -53,6 +53,7 @@ def generated_link(draw):
                 "random": ["weowewe"],
             }
         case "hysteria2":
+            uuid = draw(st.text(alphabet=alphabet + "-", min_size=8, max_size=36))
             possible_params = {"insecure": ["0", "1"], "sni": ["google.com", "microsoft.com"], "random": ["weowewe"]}
 
     available_keys = list(possible_params.keys())
@@ -79,6 +80,16 @@ def test_from_uri_on_generated_links(generated_link: str):
         return
 
     assert isinstance(outbound, AnyOutbound)
-    assert outbound.server
+    assert outbound.server == urlsplit(generated_link).hostname
     assert outbound.server_port
-    assert outbound.tag
+    assert outbound.tag == "test"
+
+
+def test_from_uri_on_unsupported_scheme():
+    with pytest.raises(ValueError):
+        from_uri("shadowrocks://example.com:443?random=1#tag")
+
+
+def test_from_uri_on_untagged_link():
+    with pytest.raises(ValueError):
+        from_uri("vless://example.com:443?random=1")
