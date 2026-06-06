@@ -1,7 +1,8 @@
+from string import ascii_lowercase, digits
 from urllib.parse import urlencode, urlunsplit, SplitResult
 import pytest
 from pathlib import Path
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 
 from outbound_models.adapters.uri import from_uri
 from outbound_models.models.outbounds import AnyOutbound
@@ -29,28 +30,30 @@ def test_from_uri_on_valid_links(valid_link: str):
 
 
 @st.composite
-def generated_valid_link(draw):
+def generated_link(draw):
     scheme = draw(st.sampled_from(["vless", "hysteria2"]))
-    uuid = draw(st.uuids())
-    host = draw(st.just("example.com"))
-    port = draw(st.integers(min_value=1, max_value=65535))
+
+    alphabet = ascii_lowercase + digits
+    uuid = draw(st.one_of(st.uuids().map(str), st.text(alphabet=alphabet, min_size=8, max_size=36)))
+
+    host = draw(st.one_of(st.just("example.com"), st.text(alphabet=alphabet, min_size=4, max_size=25)))
+
+    port = draw(st.one_of(st.integers(min_value=0, max_value=65535), st.text(alphabet=digits, min_size=2, max_size=4)))
 
     match scheme:
         case "vless":
             possible_params = {
-                "security": ["none", "tls", "reality"],
+                "security": ["none", "tls", "reality", "weowewe"],
                 "flow": ["xtls-rprx-vision", "xtls-rprx-vision-udp443", "none"],
                 "type": ["tcp", "raw", "xhttp", "ws", "grpc"],
                 "sni": ["google.com", "github.com", "microsoft.com"],
                 "pbk": ["public_key_1", "public_key_2"],
                 "sid": ["shortid1", "shortid2"],
                 "insecure": ["0", "1"],
+                "random": ["weowewe"],
             }
         case "hysteria2":
-            possible_params = {
-                "insecure": ["0", "1"],
-                "sni": ["google.com", "microsoft.com"],
-            }
+            possible_params = {"insecure": ["0", "1"], "sni": ["google.com", "microsoft.com"], "random": ["weowewe"]}
 
     available_keys = list(possible_params.keys())
     selected_keys = draw(
@@ -64,14 +67,16 @@ def generated_valid_link(draw):
 
     query = urlencode(query_dict)
 
-    return urlunsplit(
-        SplitResult(scheme=scheme, netloc=f"{uuid}@{host}:{port}", path="", query=query, fragment="example")
-    )
+    return urlunsplit(SplitResult(scheme=scheme, netloc=f"{uuid}@{host}:{port}", path="", query=query, fragment="test"))
 
 
-@given(generated_valid_link())
-def test_from_uri_on_generated_valid_links(generated_valid_link: str):
-    outbound = from_uri(generated_valid_link)
+@given(generated_link())
+@settings(max_examples=1000)
+def test_from_uri_on_generated_links(generated_link: str):
+    try:
+        outbound = from_uri(generated_link)
+    except ValueError:
+        return
 
     assert isinstance(outbound, AnyOutbound)
     assert outbound.server
