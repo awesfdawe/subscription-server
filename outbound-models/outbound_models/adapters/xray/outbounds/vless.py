@@ -15,7 +15,27 @@ def _from_xray(xray: XrayConfig) -> VlessOutbound:
         case _:
             raise ValueError("Wrong settings")
 
+    address = settings.address
+    port = settings.port
+    user_id = settings.id
     encryption = settings.encryption
+    flow = settings.flow
+
+    if settings.vnext:
+        server = settings.vnext[0]
+        if not server.users:
+            raise ValueError("VLESS users are missing from xray json")
+
+        user = server.users[0]
+        address = server.address
+        port = server.port
+        user_id = user.id
+        encryption = user.encryption
+        flow = user.flow
+
+    if address is None or port is None or user_id is None or encryption is None:
+        raise ValueError("VLESS settings are missing from xray json")
+
     if encryption == "none":
         encryption = None
 
@@ -42,12 +62,12 @@ def _from_xray(xray: XrayConfig) -> VlessOutbound:
                     security = tls._from_xray(stream.tls_settings)
 
     return VlessOutbound(
-        server=settings.address,
-        server_port=settings.port,
-        uuid=settings.id,
+        server=address,
+        server_port=port,
+        uuid=user_id,
         tag=xray.tag,
         encryption=encryption,
-        flow=settings.flow,
+        flow=flow,
         transport=transport,
         security=security,
     )
