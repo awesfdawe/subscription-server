@@ -218,3 +218,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Frontend
+frontend/.litestar.json
+frontend/node_modules/
+frontend/tsconfig.tsbuildinfo
+frontend/.svelte-kit/
+frontend/.vite/
+frontend/dist/
+frontend/public/
+frontend/resources/generated/

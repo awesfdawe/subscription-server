@@ -1,10 +1,14 @@
 [project]
 name = "subscription-server"
 version = "0.1.0"
-description = "Add your description here"
+description = "Litestar + Svelte Inertia boilerplate"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "cryptography>=45.0.0",
+    "litestar[standard]>=2.18.0",
+    "litestar-vite>=0.6.1",
+    "markupsafe>=3.0.0",
     "outbound-models",
 ]
 
