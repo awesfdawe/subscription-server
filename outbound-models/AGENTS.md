@@ -9,4 +9,5 @@ Project separated into 3 main domains:
 
 ## Testing instructions
 - Use `ty check` to run Python type checking.
+- Use `ruff check` to run Python basic errors checking.
 - Use `pytest` to run unit tests.
