@@ -1,16 +1,6 @@
-from base64 import b64decode, b64encode
-
-
-def base64_modify(base64_sub: bytes) -> bytes:
-    data = b64decode(base64_sub).decode()
-
-    data = data.join(
-        [
-            "vless://00000000-0000-0000-0000-000000000000@example.com:444?type=tcp&security=reality&pbk=0000000000000000000000000000000000000000000&fp=chrome&sni=example.com&sid=00000000&spx=%2F&flow=xtls-rprx-vision#vless%20reality%20vision%20tcp%201"
-        ]
-    )
-
-    return b64encode(data.encode())
+def base64_modify(base64_sub: str) -> str:
+    base64_sub += "\n".join(["update here"])
+    return base64_sub
 
 
 def xray_modify(xray_sub: dict) -> dict:
@@ -38,6 +28,24 @@ def singbox_modify(singbox_sub: dict) -> dict:
 
     outbounds = dict(outbounds)
 
-    outbounds.update()  # TODO: add to_singbox here
+    # outbounds.update() TODO: add to_singbox here
+
+    singbox_sub["outbounds"] = outbounds
 
     return singbox_sub
+
+
+def mihomo_modify(mihomo_sub: dict) -> dict:
+    outbounds = mihomo_sub.get("proxies")
+
+    if outbounds is None:
+        # TODO: add log
+        return mihomo_sub
+
+    outbounds = dict(outbounds)
+
+    # outbounds.update() TODO: add to_mihomo here
+
+    mihomo_sub["proxies"] = outbounds
+
+    return mihomo_sub

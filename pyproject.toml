@@ -5,8 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "granian>=2.7.9",
     "httpx>=0.28.1",
-    "litestar[standard]>=2.24.0",
+    "litestar>=2.24.0",
     "outbound-models",
 ]
 

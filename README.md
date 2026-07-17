@@ -1,3 +1,3 @@
-# subscription-server
+# remnawave-subscription-injector
 
 wip
