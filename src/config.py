@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cache
 import os
 from pathlib import Path
 from typing import Annotated
@@ -33,7 +33,7 @@ class Config(msgspec.Struct, frozen=True):
     # proxies: dict[str, ProxyProviderConfig]
 
 
-@lru_cache(1)
+@cache
 def get_config() -> Config:
     path = Path(os.getenv("CONFIG_PATH", "config.yaml"))
     if not path.exists():
