@@ -484,6 +484,7 @@ dependencies = [
     { name = "granian" },
     { name = "httpx" },
     { name = "litestar" },
+    { name = "msgspec", extra = ["yaml"] },
     { name = "outbound-models" },
 ]
 
@@ -498,6 +499,7 @@ requires-dist = [
     { name = "granian", specifier = ">=2.7.9" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "litestar", specifier = ">=2.24.0" },
+    { name = "msgspec", extras = ["yaml"], specifier = ">=0.21.1" },
     { name = "outbound-models", editable = "outbound-models" },
 ]
 
