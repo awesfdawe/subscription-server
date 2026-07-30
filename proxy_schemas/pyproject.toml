@@ -1,0 +1,9 @@
+[project]
+name = "proxy_schemas"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = ["msgspec[yaml]>=0.21.1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
