@@ -2,7 +2,11 @@
 name = "backend"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = ["proxy-schemas"]
+dependencies = [
+    "gunicorn>=26.0.0",
+    "litestar[picologging]>=2.24.0",
+    "proxy-schemas",
+]
 
 [tool.uv.sources]
 proxy-schemas = { workspace = true }
