@@ -1,8 +1,7 @@
 from enum import StrEnum
 
-from proxy_schemas.schemas.singbox.security.tls import TlsOptions
-from proxy_schemas.schemas.singbox.transports.types import AnyTransport
-
+from ..tls import TlsOptions
+from ..transports.types import AnyTransport
 from .base import Outbound
 
 

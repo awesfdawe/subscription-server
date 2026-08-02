@@ -1,13 +1,7 @@
 from enum import StrEnum
 
-from msgspec import Struct
-
-
-class TlsVersion(StrEnum):
-    V1_0 = "1.0"
-    V1_1 = "1.1"
-    V1_2 = "1.2"
-    V1_3 = "1.3"
+from proxy_schemas.schemas.base import SchemaBase
+from proxy_schemas.schemas.types import TlsVersion
 
 
 class CurvePreferences(StrEnum):
@@ -18,8 +12,8 @@ class CurvePreferences(StrEnum):
     X25519MLKEM768 = "X25519MLKEM768"
 
 
-class EchOptions(Struct, kw_only=True, forbid_unknown_fields=True):
-    enabled: bool = False
+class EchOptions(SchemaBase):
+    enabled: bool
     config: list[str] | None = None
     query_server_name: str | None = None
 
@@ -42,21 +36,21 @@ class UtlsFingerprints(StrEnum):
     randomized = "randomized"
 
 
-class UtlsOptions(Struct, kw_only=True, forbid_unknown_fields=True):
-    enabled: bool = False
+class UtlsOptions(SchemaBase):
+    enabled: bool
     fingerprint: UtlsFingerprints = UtlsFingerprints.chrome
 
 
-class RealityOptions(Struct, kw_only=True, forbid_unknown_fields=True):
-    enabled: bool = False
+class RealityOptions(SchemaBase):
     public_key: str
     short_id: str
+    enabled: bool
 
 
-class TlsOptions(Struct, kw_only=True, forbid_unknown_fields=True):
-    enabled: bool = True
+class TlsOptions(SchemaBase):
+    enabled: bool
     server_name: str | None = None
-    insecure: bool = False
+    insecure: bool | None = None
     alpn: list[str] | None = None
     min_version: TlsVersion | None = None
     max_version: TlsVersion | None = None

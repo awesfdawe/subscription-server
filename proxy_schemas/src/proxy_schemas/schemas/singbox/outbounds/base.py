@@ -1,9 +1,8 @@
-from typing import Annotated
+from proxy_schemas.schemas.base import SchemaBase
+from proxy_schemas.schemas.types import Port
 
-from msgspec import Meta, Struct
 
-
-class Outbound(Struct, kw_only=True, forbid_unknown_fields=True):
+class Outbound(SchemaBase):
     tag: str
     server: str
-    server_port: Annotated[int, Meta(ge=0, le=65535)]
+    server_port: Port
