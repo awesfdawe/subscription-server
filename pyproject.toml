@@ -2,7 +2,13 @@
 members = ["backend", "proxy_schemas"]
 
 [dependency-groups]
-dev = ["ruff>=0.16.0", "ty>=0.0.65"]
+dev = [
+    "hypothesis>=6.165.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.0",
+    "ty>=0.0.65",
+]
 
 [tool.ruff]
 line-length = 120

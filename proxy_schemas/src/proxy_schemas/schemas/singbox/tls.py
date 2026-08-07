@@ -12,7 +12,7 @@ class CurvePreferences(StrEnum):
     X25519MLKEM768 = "X25519MLKEM768"
 
 
-class EchOptions(SchemaBase):
+class EchOptions(SchemaBase, kw_only=True, forbid_unknown_fields=True):
     enabled: bool
     config: list[str] | None = None
     query_server_name: str | None = None
@@ -36,18 +36,18 @@ class UtlsFingerprints(StrEnum):
     randomized = "randomized"
 
 
-class UtlsOptions(SchemaBase):
+class UtlsOptions(SchemaBase, kw_only=True, forbid_unknown_fields=True):
     enabled: bool
     fingerprint: UtlsFingerprints = UtlsFingerprints.chrome
 
 
-class RealityOptions(SchemaBase):
+class RealityOptions(SchemaBase, kw_only=True, forbid_unknown_fields=True):
     public_key: str
     short_id: str
     enabled: bool
 
 
-class TlsOptions(SchemaBase):
+class TlsOptions(SchemaBase, kw_only=True, forbid_unknown_fields=True):
     enabled: bool
     server_name: str | None = None
     insecure: bool | None = None

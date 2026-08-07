@@ -9,7 +9,7 @@ class Flows(StrEnum):
     xtls_rprx_vision = "xtls-rprx-vision"
 
 
-class VlessOutbound(Outbound, tag="vless"):
+class VlessOutbound(Outbound, tag="vless", kw_only=True, forbid_unknown_fields=True):
     uuid: str
     flow: Flows | None = None
     tls: TlsOptions | None = None
