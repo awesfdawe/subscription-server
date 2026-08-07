@@ -5,10 +5,17 @@ from proxy_schemas.schemas.singbox.outbounds.vless import (
     VlessOutbound as SingboxVlessOutbound,
 )
 from proxy_schemas.schemas.xray.outbounds.vless import (
+    Flows as XrayFlows,
+)
+from proxy_schemas.schemas.xray.outbounds.vless import (
     VlessOutbound as XrayVlessOutbound,
+)
+from proxy_schemas.schemas.xray.outbounds.vless import (
+    VlessSettings,
 )
 
 from ..stream_settings import (
+    singbox_to_xray_stream_settings,
     xray_stream_settings_to_singbox_tls,
     xray_stream_settings_to_singbox_transport,
 )
@@ -51,4 +58,29 @@ def xray_vless_to_singbox(data: XrayVlessOutbound) -> SingboxVlessOutbound:
         flow=flow,
         tls=tls,
         transport=transport,
+    )
+
+
+def singbox_vless_to_xray(data: SingboxVlessOutbound) -> XrayVlessOutbound:
+    flow: XrayFlows | None = None
+    if data.flow is not None:
+        try:
+            flow = XrayFlows(data.flow.value)
+        except ValueError:
+            flow = None
+
+    settings = VlessSettings(
+        address=data.server,
+        port=data.server_port,
+        id=data.uuid,
+        encryption="none",
+        flow=flow,
+    )
+
+    stream_settings = singbox_to_xray_stream_settings(data.tls, data.transport)
+
+    return XrayVlessOutbound(
+        tag=data.tag,
+        settings=settings,
+        stream_settings=stream_settings,
     )

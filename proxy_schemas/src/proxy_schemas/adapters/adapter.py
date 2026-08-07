@@ -1,10 +1,11 @@
 from msgspec.json import Decoder, Encoder
 
 from proxy_schemas.schemas.singbox.outbounds.base import Outbound as SingboxOutbound
+from proxy_schemas.schemas.singbox.outbounds.vless import VlessOutbound as SingboxVlessOutbound
 from proxy_schemas.schemas.xray.outbounds.base import Outbound as XrayOutbound
 from proxy_schemas.schemas.xray.outbounds.vless import VlessOutbound as XrayVlessOutbound
 
-from .xray.outbounds.vless import xray_vless_to_singbox
+from .xray.outbounds.vless import singbox_vless_to_xray, xray_vless_to_singbox
 
 
 class OutboundAdapter:
@@ -18,3 +19,10 @@ class OutboundAdapter:
                 return xray_vless_to_singbox(vless)
             case _:
                 raise NotImplementedError(f"Unsupported Xray outbound type: {type(data)}")
+
+    def singbox_to_xray(self, data: SingboxOutbound) -> XrayOutbound:
+        match data:
+            case SingboxVlessOutbound() as vless:
+                return singbox_vless_to_xray(vless)
+            case _:
+                raise NotImplementedError(f"Unsupported Singbox outbound type: {type(data)}")
