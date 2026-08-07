@@ -13,7 +13,7 @@ class Flows(StrEnum):
 
 class VlessUser(XrayBase):
     id: str
-    encryption: str
+    encryption: str = "none"
     flow: Flows | None = None
 
 
@@ -23,19 +23,13 @@ class VlessVnext(XrayBase):
     users: list[VlessUser]
 
 
-class LegacyVlessSettings(XrayBase):
-    vnext: list[VlessVnext]
-
-
-class FlatVlessSettings(XrayBase):
-    address: str
-    port: Port
-    id: str
-    encryption: str
+class VlessSettings(XrayBase):
+    vnext: list[VlessVnext] | None = None
+    address: str | None = None
+    port: Port | None = None
+    id: str | None = None
+    encryption: str = "none"
     flow: Flows | None = None
-
-
-VlessSettings = LegacyVlessSettings | FlatVlessSettings
 
 
 class VlessOutbound(Outbound, tag="vless"):
