@@ -1,3 +1,6 @@
+import contextlib
+
+from proxy_schemas.exceptions import OutboundConversionError
 from proxy_schemas.schemas.singbox.outbounds.vless import (
     Flows as SingboxFlows,
 )
@@ -31,21 +34,21 @@ def xray_vless_to_singbox(data: XrayVlessOutbound) -> SingboxVlessOutbound:
     elif settings.vnext:
         vnext = settings.vnext[0]
         if not vnext.users:
-            raise ValueError("Legacy VlessSettings users list is empty")
+            raise OutboundConversionError(f"Legacy VLESS outbound '{data.tag}': vnext[0].users list is empty")
         user = vnext.users[0]
         server = vnext.address
         server_port = vnext.port
         uuid = user.id
         raw_flow = user.flow
     else:
-        raise ValueError("VlessSettings is missing required server parameters")
+        raise OutboundConversionError(
+            f"VLESS outbound '{data.tag}': missing required server parameters (no flat fields and no vnext)"
+        )
 
     flow: SingboxFlows | None = None
     if raw_flow is not None:
-        try:
+        with contextlib.suppress(ValueError):
             flow = SingboxFlows(str(raw_flow))
-        except ValueError:
-            flow = None
 
     tls = xray_stream_settings_to_singbox_tls(data.stream_settings)
     transport = xray_stream_settings_to_singbox_transport(data.stream_settings)
@@ -64,10 +67,8 @@ def xray_vless_to_singbox(data: XrayVlessOutbound) -> SingboxVlessOutbound:
 def singbox_vless_to_xray(data: SingboxVlessOutbound) -> XrayVlessOutbound:
     flow: XrayFlows | None = None
     if data.flow is not None:
-        try:
+        with contextlib.suppress(ValueError):
             flow = XrayFlows(data.flow.value)
-        except ValueError:
-            flow = None
 
     settings = VlessSettings(
         address=data.server,

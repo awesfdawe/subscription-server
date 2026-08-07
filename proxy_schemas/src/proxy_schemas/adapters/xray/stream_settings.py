@@ -51,11 +51,11 @@ def xray_stream_settings_to_singbox_tls(stream: StreamSettings | None) -> Singbo
         tls.max_version = stream.tls_settings.max_version
 
         if stream.tls_settings.fingerprint is not None:
-            try:
-                fingerprint = SingboxUtlsFingerprints(stream.tls_settings.fingerprint.value)
-                tls.utls = SingboxUtlsOptions(enabled=True, fingerprint=fingerprint)
-            except ValueError:
-                pass
+            with contextlib.suppress(ValueError):
+                tls.utls = SingboxUtlsOptions(
+                    enabled=True,
+                    fingerprint=SingboxUtlsFingerprints(stream.tls_settings.fingerprint.value),
+                )
 
     if stream.security == SecurityOptions.reality and stream.reality_settings:
         tls.reality = SingboxRealityOptions(
@@ -67,11 +67,11 @@ def xray_stream_settings_to_singbox_tls(stream: StreamSettings | None) -> Singbo
             tls.server_name = stream.reality_settings.server_name
 
         if stream.reality_settings.fingerprint is not None and tls.utls is None:
-            try:
-                fingerprint = SingboxUtlsFingerprints(stream.reality_settings.fingerprint.value)
-                tls.utls = SingboxUtlsOptions(enabled=True, fingerprint=fingerprint)
-            except ValueError:
-                pass
+            with contextlib.suppress(ValueError):
+                tls.utls = SingboxUtlsOptions(
+                    enabled=True,
+                    fingerprint=SingboxUtlsFingerprints(stream.reality_settings.fingerprint.value),
+                )
 
     return tls
 
