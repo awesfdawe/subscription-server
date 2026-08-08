@@ -13,7 +13,9 @@ class ProxyProvider(Base):
 
     name: Mapped[str] = mapped_column(primary_key=True)
 
-    proxies: Mapped[list["Proxy"]] = relationship(back_populates="provider", cascade="all, delete-orphan")
+    proxies: Mapped[list["Proxy"]] = relationship(
+        back_populates="provider", cascade="all, delete-orphan", passive_deletes=True
+    )
 
 
 class Proxy(Base):
@@ -22,6 +24,6 @@ class Proxy(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     outbound: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
-    provider_name: Mapped[str] = mapped_column(ForeignKey("proxy_providers.name"))
+    provider_name: Mapped[str] = mapped_column(ForeignKey("proxy_providers.name", ondelete="CASCADE"))
 
     provider: Mapped["ProxyProvider"] = relationship(back_populates="proxies")
