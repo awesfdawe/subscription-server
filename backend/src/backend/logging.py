@@ -114,6 +114,14 @@ def get_logging_config() -> StructLoggingConfig:
                     "level": log_level,
                     "propagate": False,
                 },
+                "watchfiles": {
+                    "handlers": [],
+                    "propagate": False,
+                },
+                "watchfiles.main": {
+                    "handlers": [],
+                    "propagate": False,
+                },
             },
             root={"handlers": ["queue_listener"], "level": log_level},
         ),

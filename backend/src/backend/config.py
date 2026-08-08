@@ -13,7 +13,11 @@ class AppConfig(msgspec.Struct):
     port: int = 8000
     users_file_path: str = "users.yaml"
     proxy_db_path: str = "db.sqlite3"
-    path_prefix: str = "/"
+    path_prefix: str = "/sub/"
+
+    def __post_init__(self):
+        if not self.path_prefix[0] == "/" and self.path_prefix[-1] == "/":
+            raise ValueError("Path prefix should start with / and end with /. Example: '/sub/'")
 
 
 class ProxyProvider(msgspec.Struct):
@@ -25,14 +29,6 @@ class ProxyProvider(msgspec.Struct):
 class Config(msgspec.Struct):
     proxy_providers: dict[str, ProxyProvider]
     app: AppConfig = msgspec.field(default_factory=AppConfig)
-
-
-class User(msgspec.Struct):
-    path_prefix: str
-
-
-class UsersFile(msgspec.Struct):
-    users: dict[str, User]
 
 
 @lru_cache(1)
