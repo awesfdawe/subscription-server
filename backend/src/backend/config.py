@@ -14,6 +14,7 @@ class AppConfig(msgspec.Struct):
     users_file_path: str = "users.yaml"
     proxy_db_path: str = "db.sqlite3"
     path_prefix: str = "/sub/"
+    watch_users_file: bool = False
 
     def __post_init__(self):
         if not self.path_prefix[0] == "/" and self.path_prefix[-1] == "/":
