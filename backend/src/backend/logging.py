@@ -122,6 +122,21 @@ def get_logging_config() -> StructLoggingConfig:
                     "handlers": [],
                     "propagate": False,
                 },
+                "alembic": {
+                    "handlers": ["foreign_console"],
+                    "level": log_level,
+                    "propagate": False,
+                },
+                "sqlalchemy": {
+                    "handlers": ["foreign_console"],
+                    "level": log_level,
+                    "propagate": False,
+                },
+                "sqlalchemy.engine": {
+                    "handlers": ["foreign_console"],
+                    "level": log_level,
+                    "propagate": False,
+                },
             },
             root={"handlers": ["queue_listener"], "level": log_level},
         ),
