@@ -5,6 +5,7 @@ from pathlib import Path
 from litestar import Litestar, Request, get
 from litestar.datastructures import State
 from litestar.di import Provide
+from proxy_schemas.adapters.adapter import OutboundAdapter
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +13,7 @@ from backend.config import get_config
 from backend.database import DatabaseHelper, db_session
 from backend.logging import get_logging_config
 from backend.models import ProxyProvider
+from backend.parser import parse_subscription
 from backend.users import Users, get_users_inital, watch_users_file
 
 config = get_config()
@@ -52,6 +54,14 @@ async def lifespan(app: Litestar):
 
         await session.execute(stmt)
         await session.commit()
+
+    adapter = OutboundAdapter()
+
+    for name, provider in config.proxy_providers.items():
+        if provider.url is not None:
+            await parse_subscription(
+                name, provider.url, provider.headers, provider.mix_proxies, adapter, db_helper.session_factory
+            )
 
     app.state.db_helper = db_helper
 

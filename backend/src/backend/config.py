@@ -26,6 +26,7 @@ class ProxyProvider(msgspec.Struct):
     url: str | None = None
     headers: dict[str, str] | None = None
     update_interval: int = 43200
+    mix_proxies: int = 5
 
 
 class Config(msgspec.Struct):

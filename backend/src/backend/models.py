@@ -1,14 +1,14 @@
 from typing import Any
 
 from sqlalchemy import JSON, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column, relationship
 
 
-class Base(DeclarativeBase):
+class Base(MappedAsDataclass, DeclarativeBase):
     pass
 
 
-class ProxyProvider(Base):
+class ProxyProvider(Base, kw_only=True):
     __tablename__ = "proxy_providers"
 
     name: Mapped[str] = mapped_column(primary_key=True)
@@ -18,12 +18,12 @@ class ProxyProvider(Base):
     )
 
 
-class Proxy(Base):
+class Proxy(Base, kw_only=True):
     __tablename__ = "proxies"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, init=False)
     outbound: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
-    provider_name: Mapped[str] = mapped_column(ForeignKey("proxy_providers.name", ondelete="CASCADE"))
+    provider_name: Mapped[str] = mapped_column(ForeignKey("proxy_providers.name", ondelete="CASCADE"), init=False)
 
-    provider: Mapped["ProxyProvider"] = relationship(back_populates="proxies")
+    provider: Mapped["ProxyProvider"] = relationship(back_populates="proxies", init=False)

@@ -1,13 +1,13 @@
+
 import msgspec
+import msgspec.json
 from msgspec.json import Decoder, Encoder
 
 from proxy_schemas.exceptions import (
     ConfigParseError,
-    ConfigValidationError,
     UnsupportedProtocolError,
 )
 from proxy_schemas.schemas.singbox.outbounds.base import Outbound as SingboxOutbound
-from proxy_schemas.schemas.singbox.outbounds.types import AnySingboxOutbound
 from proxy_schemas.schemas.singbox.outbounds.vless import VlessOutbound as SingboxVlessOutbound
 from proxy_schemas.schemas.xray.outbounds.base import Outbound as XrayOutbound
 from proxy_schemas.schemas.xray.outbounds.types import AnyXrayOutbound
@@ -21,51 +21,61 @@ class OutboundAdapter:
         self.json_encoder = encoder or Encoder()
         self.json_decoder = decoder or Decoder()
 
-    def get_xray_outbounds(self, config: bytes | str | dict) -> list[AnyXrayOutbound]:
+    def get_xray_outbounds(self, config: bytes | str | dict | list) -> list[AnyXrayOutbound]:
         if isinstance(config, dict):
             raw_list = config.get("outbounds", [])
+        elif isinstance(config, list):
+            raw_list = config
         else:
             raw_bytes = config.encode() if isinstance(config, str) else config
             try:
                 decoded = self.json_decoder.decode(raw_bytes)
             except msgspec.DecodeError as e:
                 raise ConfigParseError(f"Invalid JSON in Xray config: {e}") from e
-            if not isinstance(decoded, dict):
+            if isinstance(decoded, dict):
+                raw_list = decoded.get("outbounds", [])
+            elif isinstance(decoded, list):
+                raw_list = decoded
+            else:
                 raise ConfigParseError(
                     f"Expected a JSON object at the root of Xray config, got {type(decoded).__name__}"
                 )
-            raw_list = decoded.get("outbounds", [])
 
         if not isinstance(raw_list, list):
             raise ConfigParseError(f"Expected 'outbounds' to be a list, got {type(raw_list).__name__}")
 
-        try:
-            return msgspec.convert(raw_list, list[AnyXrayOutbound])
-        except msgspec.ValidationError as e:
-            raise ConfigValidationError(f"Failed to parse Xray outbounds: {e}") from e
-
-    def get_singbox_outbounds(self, config: bytes | str | dict) -> list[AnySingboxOutbound]:
-        if isinstance(config, dict):
-            raw_list = config.get("outbounds", [])
-        else:
-            raw_bytes = config.encode() if isinstance(config, str) else config
+        outbounds = []
+        for item in raw_list:
             try:
-                decoded = self.json_decoder.decode(raw_bytes)
-            except msgspec.DecodeError as e:
-                raise ConfigParseError(f"Invalid JSON in Singbox config: {e}") from e
-            if not isinstance(decoded, dict):
-                raise ConfigParseError(
-                    f"Expected a JSON object at the root of Singbox config, got {type(decoded).__name__}"
-                )
-            raw_list = decoded.get("outbounds", [])
+                item_bytes = self.json_encoder.encode(item)
+                outbounds.append(msgspec.json.decode(item_bytes, type=AnyXrayOutbound))
+            except (msgspec.ValidationError, msgspec.DecodeError):
+                pass
 
-        if not isinstance(raw_list, list):
-            raise ConfigParseError(f"Expected 'outbounds' to be a list, got {type(raw_list).__name__}")
+        return outbounds
 
-        try:
-            return msgspec.convert(raw_list, list[AnySingboxOutbound])
-        except msgspec.ValidationError as e:
-            raise ConfigValidationError(f"Failed to parse Singbox outbounds: {e}") from e
+    # def get_singbox_outbounds(self, config: bytes | str | dict) -> list[AnySingboxOutbound]:
+    #     if isinstance(config, dict):
+    #         raw_list = config.get("outbounds", [])
+    #     else:
+    #         raw_bytes = config.encode() if isinstance(config, str) else config
+    #         try:
+    #             decoded = self.json_decoder.decode(raw_bytes)
+    #         except msgspec.DecodeError as e:
+    #             raise ConfigParseError(f"Invalid JSON in Singbox config: {e}") from e
+    #         if not isinstance(decoded, dict):
+    #             raise ConfigParseError(
+    #                 f"Expected a JSON object at the root of Singbox config, got {type(decoded).__name__}"
+    #             )
+    #         raw_list = decoded.get("outbounds", [])
+
+    #     if not isinstance(raw_list, list):
+    #         raise ConfigParseError(f"Expected 'outbounds' to be a list, got {type(raw_list).__name__}")
+
+    #     try:
+    #         return msgspec.convert(raw_list, list[AnySingboxOutbound])
+    #     except msgspec.ValidationError as e:
+    #         raise ConfigValidationError(f"Failed to parse Singbox outbounds: {e}") from e
 
     def xray_to_singbox(self, data: XrayOutbound) -> SingboxOutbound:
         match data:

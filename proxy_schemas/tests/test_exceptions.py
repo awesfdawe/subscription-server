@@ -52,7 +52,7 @@ def test_validation_error_raises_config_validation_error(adapter):
 
 def test_missing_server_params_raises_outbound_conversion_error(adapter):
     empty_settings = VlessSettings()
-    bad_xray_node = XrayVlessOutbound(tag="bad", settings=empty_settings)
+    bad_xray_node = XrayVlessOutbound(label="bad", settings=empty_settings)
     with pytest.raises(OutboundConversionError, match="missing required server parameters"):
         adapter.xray_to_singbox(bad_xray_node)
 
@@ -60,13 +60,13 @@ def test_missing_server_params_raises_outbound_conversion_error(adapter):
 def test_empty_vnext_users_raises_outbound_conversion_error(adapter):
     empty_vnext = VlessVnext(address="1.1.1.1", port=443, users=[])
     legacy_empty_users = VlessSettings(vnext=[empty_vnext])
-    bad_xray_node = XrayVlessOutbound(tag="bad_vnext", settings=legacy_empty_users)
+    bad_xray_node = XrayVlessOutbound(label="bad_vnext", settings=legacy_empty_users)
     with pytest.raises(OutboundConversionError, match="vnext\\[0\\].users list is empty"):
         adapter.xray_to_singbox(bad_xray_node)
 
 
 def test_unsupported_protocol_raises_unsupported_error(adapter):
-    unsupported_xray = DummyUnsupportedXrayOutbound(tag="unsupported")
+    unsupported_xray = DummyUnsupportedXrayOutbound(label="unsupported")
     with pytest.raises(UnsupportedProtocolError, match="Xray protocol"):
         adapter.xray_to_singbox(unsupported_xray)
 

@@ -72,6 +72,7 @@ class TlsOptions(XrayBase):
 
 
 class StreamSettings(XrayBase):
+    network: TransportOptions | None = None
     method: TransportOptions | None = None
     grpc_settings: GrpcTransport | None = None
     ws_settings: WebsocketTransport | None = None

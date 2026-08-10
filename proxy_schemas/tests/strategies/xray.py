@@ -119,7 +119,7 @@ def xray_stream_settings_st(draw):
 @st.composite
 def xray_vless_flat_st(draw):
     return XrayVlessOutbound(
-        tag=draw(tags_st),
+        label=draw(tags_st),
         settings=VlessSettings(
             address=draw(servers_st),
             port=draw(ports_st),
@@ -144,7 +144,7 @@ def xray_vless_legacy_st(draw):
         users=[user],
     )
     return XrayVlessOutbound(
-        tag=draw(tags_st),
+        label=draw(tags_st),
         settings=VlessSettings(
             vnext=[vnext],
         ),
