@@ -4,8 +4,7 @@ from os import getenv
 from pathlib import Path
 
 import msgspec
-
-from backend.logging import get_logger
+from loguru import logger
 
 
 class AppConfig(msgspec.Struct):
@@ -36,8 +35,6 @@ class Config(msgspec.Struct):
 
 @lru_cache(1)
 def get_config() -> Config:
-    logger = get_logger(__name__)
-
     config_path = getenv("CONFIG_PATH")
     file_path = Path(config_path) if config_path is not None else Path("config.yaml")
     try:
