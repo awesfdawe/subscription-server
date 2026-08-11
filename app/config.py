@@ -14,6 +14,7 @@ class AppConfig(msgspec.Struct):
     proxy_db_path: str = "db.sqlite3"
     path_prefix: str = "/sub/"
     watch_users_file: bool = False
+    update_proxies_on_start: bool = False
 
     def __post_init__(self):
         if not self.path_prefix[0] == "/" and self.path_prefix[-1] == "/":
@@ -22,10 +23,11 @@ class AppConfig(msgspec.Struct):
 
 class ProxyProvider(msgspec.Struct):
     title: str | None = None
+    show_title: bool = True
     url: str | None = None
     headers: dict[str, str] | None = None
     update_interval: int = 43200
-    mix_proxies: int = 5
+    min_proxies: int = 5
 
 
 class Config(msgspec.Struct):

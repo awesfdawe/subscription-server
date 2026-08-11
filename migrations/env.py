@@ -1,12 +1,12 @@
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from app.config import get_config
 from app.logging import setup_logging
 from app.proxy.models import Base
 
 setup_logging()
 
-from app.config import get_config  # noqa: E402
 
 app_config = get_config()
 config = context.config

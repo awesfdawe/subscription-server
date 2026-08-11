@@ -32,10 +32,15 @@ async def dump_xray_subscription(
         logger.error(f"Request returned non valid json response: {e}")
         return
 
+    ignored_protocols = ("freedom", "blackhole", "dns", "loopback")
     validated_configs = []
     for config in xray_configs:
         try:
-            validated_configs.append(msgspec.convert(config, type=XraySchema))
+            valid_config = msgspec.convert(config, type=XraySchema)
+            for outbound in valid_config.outbounds:
+                if outbound["protocol"] and outbound["protocol"] in ignored_protocols:
+                    valid_config.outbounds.remove(outbound)
+            validated_configs.append(valid_config)
         except msgspec.ValidationError as e:
             logger.error(f"Request returned non valid xray json config: {e}")
 
@@ -57,6 +62,6 @@ async def dump_xray_subscription(
                 db_session.add(provider)
 
             await db_session.commit()
-            logger.info("Xray configs dumped successfuly")
+            logger.info(f"Xray configs of provider: {provider_name} dumped successfuly")
     else:
         logger.error(f"Request returned less xray configs than was requied: {validated_configs_len} < {min_proxies}")

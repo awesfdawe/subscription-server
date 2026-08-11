@@ -3,6 +3,7 @@ name = "app"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "aiofiles>=25.1.0",
     "aiohttp[speedups]>=3.14.3",
     "alembic>=1.19.1",
     "litestar>=2.24.0",
@@ -10,6 +11,7 @@ dependencies = [
     "msgspec>=0.21.1",
     "sqlalchemy[aiosqlite]>=2.0.51",
     "uvicorn>=0.52.1",
+    "watchfiles>=1.2.0",
 ]
 
 [dependency-groups]

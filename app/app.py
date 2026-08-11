@@ -1,30 +1,60 @@
+import asyncio
 from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Any
 
 from aiohttp import ClientSession
 from litestar import Litestar, get
-from sqlalchemy import delete
+from litestar.datastructures import State
+from litestar.exceptions import NotFoundException
+from sqlalchemy import delete, select
+from sqlalchemy.orm import selectinload
 
-from app.config import get_config
+from app.config import Config, get_config
 from app.database import Database
 from app.logging import setup_logging
 from app.proxy.models import ProxyProvider
 from app.proxy.parser import dump_xray_subscription
+from app.users import Users, get_users_inital, watch_users_file
 
 setup_logging()
 config = get_config()
 
 
-@get("/")
-async def get_subscription() -> str:
-    return "test"
+@get(f"{config.app.path_prefix}{{user_path:str}}")
+async def get_subscription(state: State, user_path: str) -> list[dict[str, Any]]:
+    users: Users = state.users
+    if user_path in (user.path_prefix for user in users.users.values()):
+        db: Database = state.db
+        stmt = select(ProxyProvider).options(selectinload(ProxyProvider.proxies))
+        async with db.session_factory() as db_session:
+            result = await db_session.execute(stmt)
+
+        config: Config = state.config
+        providers = result.scalars().all()
+        subscription = []
+
+        for provider_name, provider in config.proxy_providers.items():
+            if provider.show_title and provider.title:
+                subscription.append(
+                    {"outbounds": [{"protocol": "blackhole", "tag": "block"}], "remarks": provider.title}
+                )
+            for db_provider in providers:
+                if db_provider.name == provider_name:
+                    for proxy in db_provider.proxies:
+                        subscription.append(proxy.xray_config)
+
+        return subscription
+    raise NotFoundException()
 
 
 @asynccontextmanager
 async def lifespan(app: Litestar):
+    app.state.config = config
+
     db = Database(f"sqlite+aiosqlite:///{config.app.proxy_db_path}")
 
     providers_names = list(config.proxy_providers.keys())
-
     async with db.session_factory() as session:
         if providers_names:
             stmt = delete(ProxyProvider).where(ProxyProvider.name.not_in(providers_names))
@@ -37,13 +67,34 @@ async def lifespan(app: Litestar):
     async with ClientSession() as session:
         for name, provider in config.proxy_providers.items():
             if provider.url is not None:
-                await dump_xray_subscription(name, provider.url, provider.headers, provider.mix_proxies, db, session)
+                async with db.session_factory() as db_session:
+                    db_provider = await db_session.get(
+                        ProxyProvider, name, options=[selectinload(ProxyProvider.proxies)]
+                    )
+                    if (
+                        not db_provider
+                        or len(db_provider.proxies) < provider.min_proxies
+                        or config.app.update_proxies_on_start
+                    ):
+                        await dump_xray_subscription(
+                            name, provider.url, provider.headers, provider.min_proxies, db, session
+                        )
 
     app.state.db = db
+
+    users_file = Path(config.app.users_file_path)
+    app.state.users = await get_users_inital(users_file)
+
+    watcher_task = None
+    if config.app.watch_users_file:
+        watcher_task = asyncio.create_task(watch_users_file(app))
 
     try:
         yield
     finally:
+        if watcher_task is not None:
+            watcher_task.cancel()
+            await asyncio.gather(watcher_task, return_exceptions=True)
         await db.dispose()
 
 

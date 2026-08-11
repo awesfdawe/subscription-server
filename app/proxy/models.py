@@ -17,7 +17,7 @@ class ProxyProvider(Base, kw_only=True):
     )
 
 
-class Proxy(Base, kw_only=True, omit_defaults=True):
+class Proxy(Base, kw_only=True):
     __tablename__ = "proxies"
 
     id: Mapped[int] = mapped_column(primary_key=True, init=False)
