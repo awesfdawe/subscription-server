@@ -1,4 +1,11 @@
 import uvicorn
 
+from app.config import get_config
+from app.logging import setup_logging
+
 if __name__ == "__main__":
-    uvicorn.run("app.app:app", host="127.0.0.1", port=8000, log_config=None, access_log=True)
+    setup_logging()
+
+    config = get_config()
+
+    uvicorn.run("app.app:app", host=config.app.bind, port=config.app.port, log_config=None, access_log=True)

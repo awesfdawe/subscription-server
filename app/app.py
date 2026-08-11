@@ -64,6 +64,8 @@ async def lifespan(app: Litestar):
     if config.app.xray_template_path:
         xray_template = Path(config.app.xray_template_path)
         app.state.xray_template = get_xray_template(xray_template)
+    else:
+        app.state.xray_template = None
 
     db = Database(f"sqlite+aiosqlite:///{config.app.proxy_db_path}")
 
