@@ -11,6 +11,7 @@ from loguru import logger
 class AppConfig(msgspec.Struct):
     bind: str = "0.0.0.0"
     port: int = 8000
+    response_headers: dict[str, str] | None = None
     users_file_path: str = "users.yaml"
     proxy_db_path: str = "db.sqlite3"
     path_prefix: str = "/sub/"

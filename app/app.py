@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from litestar import Litestar, get
+from litestar import Litestar, Response, get
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
 from sqlalchemy import delete, select
@@ -22,7 +22,7 @@ config = get_config()
 
 
 @get(f"{config.app.path_prefix}{{user_path:str}}")
-async def get_subscription(state: State, user_path: str) -> list[dict[str, Any]]:
+async def get_subscription(state: State, user_path: str) -> Response[list[dict[str, Any]]]:
     users: Users = state.users
     if user_path in (user.path_prefix for user in users.users.values()):
         db: Database = state.db
@@ -44,7 +44,7 @@ async def get_subscription(state: State, user_path: str) -> list[dict[str, Any]]
                     for proxy in db_provider.proxies:
                         subscription.append(proxy.xray_config)
 
-        return subscription
+        return Response(subscription, headers=config.app.response_headers)
     raise NotFoundException()
 
 
