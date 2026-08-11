@@ -21,7 +21,7 @@ class AppConfig(msgspec.Struct):
 
 
 class ProxyProvider(msgspec.Struct):
-    name: str | None = None
+    title: str | None = None
     url: str | None = None
     headers: dict[str, str] | None = None
     update_interval: int = 43200
@@ -40,13 +40,13 @@ def get_config() -> Config:
     try:
         file_content = file_path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        logger.critical(f"File does not exist at path: {file_path}")
+        logger.critical(f"File does not exist at path: {file_path.absolute()}")
         sys.exit(1)
     except IsADirectoryError:
-        logger.critical(f"Path is a directory, not a file: {file_path}")
+        logger.critical(f"Path is a directory, not a file: {file_path.absolute()}")
         sys.exit(1)
     except PermissionError:
-        logger.critical(f"Permission denied when reading file: {file_path}")
+        logger.critical(f"Permission denied when reading file: {file_path.absolute()}")
         sys.exit(1)
 
     try:

@@ -1,6 +1,7 @@
 import inspect
 import logging
 import sys
+from os import getenv
 
 from loguru import logger
 
@@ -22,12 +23,14 @@ class InterceptHandler(logging.Handler):
 
 
 def setup_logging():
+    log_level = logging.getLevelNamesMapping().get(getenv("LOG_LEVEL"), logging.INFO)
+
     logger.remove()
-    logger.add(sys.stderr, level=20, enqueue=True)
+    logger.add(sys.stderr, level=log_level, enqueue=True)
 
     intercept_handler = InterceptHandler()
 
-    logging.basicConfig(handlers=[intercept_handler], level=20, force=True)
+    logging.basicConfig(handlers=[intercept_handler], level=log_level, force=True)
 
     for module in ("uvicorn", "uvicorn.access", "uvicorn.error"):
         mod_logger = logging.getLogger(module)

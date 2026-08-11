@@ -3,6 +3,7 @@ name = "app"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "aiohttp[speedups]>=3.14.3",
     "alembic>=1.19.1",
     "litestar>=2.24.0",
     "loguru>=0.7.3",
