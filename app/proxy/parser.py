@@ -16,15 +16,16 @@ async def dump_xray_subscription(
     headers: dict[str, str] | None,
     min_proxies: int,
     db: Database,
-    session: ClientSession,
 ):
     try:
-        response = await session.get(url, headers=headers, timeout=ClientTimeout(5.0))
-        response.raise_for_status()
+        async with (
+            ClientSession() as session,
+            session.get(url, headers=headers, timeout=ClientTimeout(5.0)) as response,
+        ):
+            response.raise_for_status()
+            response_text = await response.text()
     except (ClientError, TimeoutError) as e:
         logger.error(f"Request to {url} failed: {e}")
-
-    response_text = await response.text()
 
     try:
         xray_configs = msgspec.json.decode(response_text, type=list[dict[str, Any]])

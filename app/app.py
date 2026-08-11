@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from aiohttp import ClientSession
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from litestar import Litestar, get
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
@@ -64,21 +64,28 @@ async def lifespan(app: Litestar):
         await session.execute(stmt)
         await session.commit()
 
-    async with ClientSession() as session:
-        for name, provider in config.proxy_providers.items():
-            if provider.url is not None:
-                async with db.session_factory() as db_session:
-                    db_provider = await db_session.get(
-                        ProxyProvider, name, options=[selectinload(ProxyProvider.proxies)]
-                    )
-                    if (
-                        not db_provider
-                        or len(db_provider.proxies) < provider.min_proxies
-                        or config.app.update_proxies_on_start
-                    ):
-                        await dump_xray_subscription(
-                            name, provider.url, provider.headers, provider.min_proxies, db, session
-                        )
+    scheduler = AsyncIOScheduler()
+
+    for name, provider in config.proxy_providers.items():
+        if provider.url is not None:
+            async with db.session_factory() as db_session:
+                db_provider = await db_session.get(ProxyProvider, name, options=[selectinload(ProxyProvider.proxies)])
+                if (
+                    not db_provider
+                    or len(db_provider.proxies) < provider.min_proxies
+                    or config.app.update_proxies_on_start
+                ):
+                    await dump_xray_subscription(name, provider.url, provider.headers, provider.min_proxies, db)
+
+            scheduler.add_job(
+                dump_xray_subscription,
+                "interval",
+                seconds=provider.update_interval,
+                id=name,
+                args=[name, provider.url, provider.headers, provider.min_proxies, db],
+            )
+
+    scheduler.start()
 
     app.state.db = db
 
@@ -96,6 +103,7 @@ async def lifespan(app: Litestar):
             watcher_task.cancel()
             await asyncio.gather(watcher_task, return_exceptions=True)
         await db.dispose()
+        scheduler.shutdown(wait=False)
 
 
 app = Litestar([get_subscription], lifespan=[lifespan])

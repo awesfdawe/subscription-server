@@ -2,6 +2,7 @@ import sys
 from functools import lru_cache
 from os import getenv
 from pathlib import Path
+from typing import Annotated
 
 import msgspec
 from loguru import logger
@@ -26,8 +27,8 @@ class ProxyProvider(msgspec.Struct):
     show_title: bool = True
     url: str | None = None
     headers: dict[str, str] | None = None
-    update_interval: int = 43200
-    min_proxies: int = 5
+    update_interval: Annotated[int, msgspec.Meta(ge=30)] = 43200
+    min_proxies: Annotated[int, msgspec.Meta(ge=1)] = 5
 
 
 class Config(msgspec.Struct):

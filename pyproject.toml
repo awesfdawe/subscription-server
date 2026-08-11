@@ -6,6 +6,7 @@ dependencies = [
     "aiofiles>=25.1.0",
     "aiohttp[speedups]>=3.14.3",
     "alembic>=1.19.1",
+    "apscheduler>=3.11.3",
     "litestar>=2.24.0",
     "loguru>=0.7.3",
     "msgspec>=0.21.1",

@@ -32,7 +32,7 @@ def setup_logging():
 
     logging.basicConfig(handlers=[intercept_handler], level=log_level, force=True)
 
-    for module in ("uvicorn", "uvicorn.access", "uvicorn.error"):
+    for module in ("uvicorn", "apscheduler", "watchfiles"):
         mod_logger = logging.getLogger(module)
         mod_logger.handlers.clear()
         mod_logger.handlers = [intercept_handler]
