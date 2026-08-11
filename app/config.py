@@ -14,6 +14,7 @@ class AppConfig(msgspec.Struct):
     response_headers: dict[str, str] | None = None
     users_file_path: str = "users.yaml"
     proxy_db_path: str = "db.sqlite3"
+    xray_template_path: str | None = None
     path_prefix: str = "/sub/"
     watch_users_file: bool = False
     update_proxies_on_start: bool = False

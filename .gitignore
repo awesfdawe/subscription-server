@@ -222,6 +222,7 @@ __marimo__/
 # subscription server
 config.yaml
 users.yaml
+xray_template.json
 db.sqlite3
 db.sqlite3-shm
 db.sqlite3-wal

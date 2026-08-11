@@ -45,7 +45,7 @@ async def get_users_inital(file_path: Path) -> Users:
     try:
         return msgspec.yaml.decode(file_content, type=Users)
     except msgspec.ValidationError as e:
-        logger.critical(f"Config validation error: {e}")
+        logger.critical(f"Users file validation error: {e}")
         sys.exit(1)
 
 

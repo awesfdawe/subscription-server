@@ -15,6 +15,7 @@ from app.database import Database
 from app.logging import setup_logging
 from app.proxy.models import ProxyProvider
 from app.proxy.parser import dump_xray_subscription
+from app.proxy.templates import get_xray_template
 from app.users import Users, get_users_inital, watch_users_file
 
 setup_logging()
@@ -31,6 +32,8 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
             result = await db_session.execute(stmt)
 
         config: Config = state.config
+        xray_template: dict[str, Any] | None = state.xray_template
+
         providers = result.scalars().all()
         subscription = []
 
@@ -42,7 +45,10 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
             for db_provider in providers:
                 if db_provider.name == provider_name:
                     for proxy in db_provider.proxies:
-                        subscription.append(proxy.xray_config)
+                        if xray_template:
+                            subscription.append(xray_template | proxy.xray_config)
+                        else:
+                            subscription.append(proxy.xray_config)
 
         return Response(subscription, headers=config.app.response_headers)
     raise NotFoundException()
@@ -51,6 +57,13 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
 @asynccontextmanager
 async def lifespan(app: Litestar):
     app.state.config = config
+
+    users_file = Path(config.app.users_file_path)
+    app.state.users = await get_users_inital(users_file)
+
+    if config.app.xray_template_path:
+        xray_template = Path(config.app.xray_template_path)
+        app.state.xray_template = get_xray_template(xray_template)
 
     db = Database(f"sqlite+aiosqlite:///{config.app.proxy_db_path}")
 
@@ -88,9 +101,6 @@ async def lifespan(app: Litestar):
     scheduler.start()
 
     app.state.db = db
-
-    users_file = Path(config.app.users_file_path)
-    app.state.users = await get_users_inital(users_file)
 
     watcher_task = None
     if config.app.watch_users_file:
