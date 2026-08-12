@@ -12,8 +12,8 @@ class AppConfig(msgspec.Struct):
     bind: str = "0.0.0.0"
     port: int = 8000
     response_headers: dict[str, str] | None = None
-    users_file_path: str = "users.yaml"
-    proxy_db_path: str = "db.sqlite3"
+    users_file_path: str = "config/users.yaml"
+    proxy_db_path: str = "data/db.sqlite3"
     xray_template_path: str | None = None
     path_prefix: str = "/sub/"
     watch_users_file: bool = False
@@ -41,7 +41,7 @@ class Config(msgspec.Struct):
 @lru_cache(1)
 def get_config() -> Config:
     config_path = getenv("CONFIG_PATH")
-    file_path = Path(config_path) if config_path is not None else Path("config.yaml")
+    file_path = Path(config_path) if config_path is not None else Path("config/config.yaml")
     try:
         file_content = file_path.read_text(encoding="utf-8")
     except FileNotFoundError:

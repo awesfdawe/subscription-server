@@ -1,0 +1,5 @@
+services:
+  subscription-server:
+    container_name: subscription-server
+    build:
+      context: .

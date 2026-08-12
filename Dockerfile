@@ -14,9 +14,10 @@ ENV UV_SYSTEM_PYTHON=1
 RUN uv pip install *.whl && rm *.whl
 
 COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 COPY alembic.ini .
 COPY migrations/ ./migrations
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["python", "-m", "app"]
