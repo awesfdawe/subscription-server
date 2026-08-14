@@ -1,6 +1,5 @@
 import asyncio
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -32,7 +31,7 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
             result = await db_session.execute(stmt)
 
         config: Config = state.config
-        xray_template: dict[str, Any] | None = state.xray_template
+        xray_template: dict[str, Any] = state.xray_template
 
         providers = result.scalars().all()
         subscription = []
@@ -45,10 +44,12 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
             for db_provider in providers:
                 if db_provider.name == provider_name:
                     for proxy in db_provider.proxies:
-                        if xray_template:
-                            subscription.append(xray_template | proxy.xray_config)
-                        else:
-                            subscription.append(proxy.xray_config)
+                        merged = proxy.xray_config | xray_template
+                        if "routing" in xray_template and "routing" in proxy.xray_config:
+                            merged["routing"] = proxy.xray_config["routing"] | xray_template["routing"]
+                        if "outbounds" in xray_template and "outbounds" in proxy.xray_config:
+                            merged["outbounds"] = proxy.xray_config["outbounds"] + xray_template["outbounds"]
+                        subscription.append(merged)
 
         return Response(subscription, headers=config.app.response_headers)
     raise NotFoundException()
@@ -57,15 +58,8 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
 @asynccontextmanager
 async def lifespan(app: Litestar):
     app.state.config = config
-
-    users_file = Path(config.app.users_file_path)
-    app.state.users = await get_users_inital(users_file)
-
-    if config.app.xray_template_path:
-        xray_template = Path(config.app.xray_template_path)
-        app.state.xray_template = get_xray_template(xray_template)
-    else:
-        app.state.xray_template = None
+    app.state.users = await get_users_inital(config.app.users_file_path)
+    app.state.xray_template = get_xray_template(config.app.xray_template_path)
 
     db = Database(f"sqlite+aiosqlite:///{config.app.proxy_db_path}")
 

@@ -26,6 +26,7 @@ async def dump_xray_subscription(
             response_text = await response.text()
     except (ClientError, TimeoutError) as e:
         logger.error(f"Request to {url} failed: {e}")
+        return
 
     try:
         xray_configs = msgspec.json.decode(response_text, type=list[dict[str, Any]])
@@ -38,9 +39,9 @@ async def dump_xray_subscription(
     for config in xray_configs:
         try:
             valid_config = msgspec.convert(config, type=XraySchema)
-            for outbound in valid_config.outbounds:
-                if outbound["protocol"] and outbound["protocol"] in ignored_protocols:
-                    valid_config.outbounds.remove(outbound)
+            valid_config.outbounds = [
+                outbound for outbound in valid_config.outbounds if outbound.get("protocol") not in ignored_protocols
+            ]
             validated_configs.append(valid_config)
         except msgspec.ValidationError as e:
             logger.error(f"Request returned non valid xray json config: {e}")
