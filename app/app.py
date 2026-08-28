@@ -1,11 +1,15 @@
 import asyncio
+import sys
 from contextlib import asynccontextmanager
 from typing import Any
 
+import aiofiles
+import msgspec
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from litestar import Litestar, Response, get
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
+from loguru import logger
 from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 
@@ -41,15 +45,35 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
                 subscription.append(
                     {"outbounds": [{"protocol": "blackhole", "tag": "block"}], "remarks": provider.title}
                 )
-            for db_provider in providers:
-                if db_provider.name == provider_name:
-                    for proxy in db_provider.proxies:
-                        merged = proxy.xray_config | xray_template
-                        if "routing" in xray_template and "routing" in proxy.xray_config:
-                            merged["routing"] = proxy.xray_config["routing"] | xray_template["routing"]
-                        if "outbounds" in xray_template and "outbounds" in proxy.xray_config:
-                            merged["outbounds"] = proxy.xray_config["outbounds"] + xray_template["outbounds"]
-                        subscription.append(merged)
+            if provider.type == "url":
+                for db_provider in providers:
+                    if db_provider.name == provider_name:
+                        for proxy in db_provider.proxies:
+                            merged = proxy.xray_config | xray_template
+                            if "routing" in xray_template and "routing" in proxy.xray_config:
+                                merged["routing"] = proxy.xray_config["routing"] | xray_template["routing"]
+                            if "outbounds" in xray_template and "outbounds" in proxy.xray_config:
+                                merged["outbounds"] = proxy.xray_config["outbounds"] + xray_template["outbounds"]
+                            subscription.append(merged)
+            elif provider.type == "file":
+                try:
+                    async with aiofiles.open(provider.path, encoding="utf-8") as f:
+                        file_content = await f.read()
+                except FileNotFoundError:
+                    logger.critical(f"File does not exist at path: {provider.path}")
+                    sys.exit(1)
+                except IsADirectoryError:
+                    logger.critical(f"Path is a directory, not a file: {provider.path}")
+                    sys.exit(1)
+                except PermissionError:
+                    logger.critical(f"Permission denied when reading file: {provider.path}")
+                    sys.exit(1)
+
+                try:
+                    subscription.append(msgspec.json.decode(file_content) | xray_template)
+                except msgspec.ValidationError as e:
+                    logger.critical(f"Users file validation error: {e}")
+                    sys.exit(1)
 
         return Response(subscription, headers=config.app.response_headers)
     raise NotFoundException()
@@ -76,7 +100,7 @@ async def lifespan(app: Litestar):
     scheduler = AsyncIOScheduler()
 
     for name, provider in config.proxy_providers.items():
-        if provider.url is not None:
+        if provider.type == "url" and provider.url is not None:
             async with db.session_factory() as db_session:
                 db_provider = await db_session.get(ProxyProvider, name, options=[selectinload(ProxyProvider.proxies)])
                 if (

@@ -2,7 +2,7 @@ import sys
 from functools import lru_cache
 from os import getenv
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 import msgspec
 from loguru import logger
@@ -49,10 +49,18 @@ class AppConfig(msgspec.Struct):
 class ProxyProvider(msgspec.Struct):
     title: str | None = None
     show_title: bool = True
+    type: Literal["url", "file"] | None = None
     url: str | None = None
     headers: dict[str, str] | None = None
     update_interval: Annotated[int, msgspec.Meta(ge=30)] = 43200
     min_proxies: Annotated[int, msgspec.Meta(ge=1)] = 5
+    path: str | None = None
+
+    def __post_init__(self):
+        if self.type == "url" and self.url is None:
+            raise ValueError("url must be specified when type = url")
+        if self.type == "file" and self.path is None:
+            raise ValueError("path must be specified when type = file")
 
 
 class Config(msgspec.Struct):
