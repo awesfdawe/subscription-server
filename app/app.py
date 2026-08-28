@@ -70,7 +70,13 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
                     sys.exit(1)
 
                 try:
-                    subscription.append(msgspec.json.decode(file_content) | xray_template)
+                    xray_config = msgspec.json.decode(file_content)
+                    merged = xray_config | xray_template
+                    if "routing" in xray_template and "routing" in xray_config:
+                        merged["routing"] = xray_config["routing"] | xray_template["routing"]
+                    if "outbounds" in xray_template and "outbounds" in xray_config:
+                        merged["outbounds"] = xray_config["outbounds"] + xray_template["outbounds"]
+                    subscription.append(merged)
                 except msgspec.ValidationError as e:
                     logger.critical(f"Users file validation error: {e}")
                     sys.exit(1)
