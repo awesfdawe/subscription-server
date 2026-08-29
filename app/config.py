@@ -31,7 +31,9 @@ def default_xray_template_path() -> Path:
 class AppConfig(msgspec.Struct):
     bind: str = "0.0.0.0"
     port: int = 8000
+    trusted_ips: list[str] | str | None = None
     response_headers: dict[str, str] | None = None
+    unix_socket_path: str | None = None
     users_file_path: Path = msgspec.field(default_factory=default_users_path)
     proxy_db_path: Path = msgspec.field(default_factory=default_db_path)
     xray_template_path: Path = msgspec.field(default_factory=default_xray_template_path)
