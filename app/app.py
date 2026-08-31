@@ -18,8 +18,8 @@ from app.logging import setup_logging
 from app.proxy.models import ProxyProvider
 from app.proxy.parser import dump_xray_subscription, get_validated_xray_configs
 from app.proxy.schemas import XraySchema
-from app.proxy.templates import get_xray_template
-from app.users import Users, get_users
+from app.proxy.templates import get_xray_template, merge_with_xray_template
+from app.users import get_users
 
 setup_logging()
 config = get_config()
@@ -27,8 +27,8 @@ config = get_config()
 
 @get(f"{config.app.path_prefix}{{user_path:str}}")
 async def get_subscription(state: State, user_path: str) -> Response[list[dict[str, Any]]]:
-    users: Users = state.users
-    if user_path in (user.path_prefix for user in users.users.values()):
+    users_prefixes: set[str] = state.users_prefixes
+    if user_path in users_prefixes:
         db: Database = state.db
         stmt = select(ProxyProvider).options(selectinload(ProxyProvider.proxies))
         async with db.session_factory() as db_session:
@@ -50,22 +50,10 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
                 for db_provider in providers:
                     if db_provider.name == provider_name:
                         for proxy in db_provider.proxies:
-                            merged = proxy.xray_config | xray_template
-                            if xray_template.get("routing") and proxy.xray_config.get("routing"):
-                                merged["routing"] = proxy.xray_config["routing"] | xray_template["routing"]
-                            if xray_template.get("outbounds") and proxy.xray_config.get("outbounds"):
-                                merged["outbounds"] = proxy.xray_config["outbounds"] + xray_template["outbounds"]
-                            subscription.append(merged)
+                            subscription.append(merge_with_xray_template(proxy.xray_config, xray_template))
             elif provider.type == "file":
                 for proxy in file_providers[provider_name]:
-                    xray_config = msgspec.to_builtins(proxy)
-                    merged = xray_config | xray_template
-                    if xray_template.get("routing") and xray_config.get("routing"):
-                        merged["routing"] = xray_config["routing"] | xray_template["routing"]
-                    if xray_template.get("outbounds") and xray_config.get("outbounds"):
-                        merged["outbounds"] = xray_config["outbounds"] + xray_template["outbounds"]
-                    subscription.append(merged)
-
+                    subscription.append(merge_with_xray_template(msgspec.to_builtins(proxy), xray_template))
         return Response(subscription, headers=config.app.response_headers)
     raise NotFoundException()
 
@@ -73,7 +61,9 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
 @asynccontextmanager
 async def lifespan(app: Litestar):
     app.state.config = config
-    app.state.users = get_users(config.app.users_file_path)
+    users = get_users(config.app.users_file_path)
+    app.state.users = users
+    app.state.users_prefixes = {user.path_prefix for user in users.users.values()}
     app.state.xray_template = get_xray_template(config.app.xray_template_path)
 
     db = Database(f"sqlite+aiosqlite:///{config.app.proxy_db_path}")
