@@ -20,8 +20,7 @@ class Users(msgspec.Struct):
         for user_key, user in self.users.items():
             if user.path_prefix in prefixes:
                 raise ValueError(f"Duplicate path_prefix '{user.path_prefix}' found for user '{user_key}'")
-
-        prefixes.add(user.path_prefix)
+            prefixes.add(user.path_prefix)
 
 
 @lru_cache(1)

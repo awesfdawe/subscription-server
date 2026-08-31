@@ -38,7 +38,7 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
         xray_template: dict[str, Any] = state.xray_template
 
         providers = result.scalars().all()
-        file_providers: dict[str, list[XraySchema]] = app.state.file_providers
+        file_providers: dict[str, list[XraySchema]] = state.file_providers
         subscription = []
 
         for provider_name, provider in config.proxy_providers.items():

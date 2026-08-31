@@ -39,11 +39,10 @@ class AppConfig(msgspec.Struct):
     proxy_db_path: Path = msgspec.field(default_factory=default_db_path)
     xray_template_path: Path = msgspec.field(default_factory=default_xray_template_path)
     path_prefix: str = "/"
-    watch_users_file: bool = False
     update_proxies_on_start: bool = False
 
     def __post_init__(self):
-        if not self.path_prefix[0] == "/" and self.path_prefix[-1] == "/":
+        if not self.path_prefix.startswith("/") and not self.path_prefix.endswith("/"):
             raise ValueError("Path prefix should start with / and end with /. Example: '/sub/', '/'")
 
         if self.response_headers:

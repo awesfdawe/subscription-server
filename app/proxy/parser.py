@@ -37,7 +37,7 @@ async def dump_xray_subscription(
     try:
         async with (
             ClientSession() as session,
-            session.get(url, headers=headers, timeout=ClientTimeout(5.0)) as response,
+            session.get(url, headers=headers, timeout=ClientTimeout(15.0)) as response,
         ):
             response.raise_for_status()
             response_text = await response.text()
