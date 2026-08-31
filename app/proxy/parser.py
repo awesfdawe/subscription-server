@@ -10,6 +10,23 @@ from app.proxy.models import Proxy, ProxyProvider
 from app.proxy.schemas import XraySchema
 
 
+def get_validated_xray_configs(xray_configs: list[dict[str, Any]]) -> list[XraySchema]:
+    ignored_protocols = ("freedom", "blackhole", "dns", "loopback")
+
+    validated_configs = []
+    for config in xray_configs:
+        try:
+            valid_config = msgspec.convert(config, type=XraySchema)
+            valid_config.outbounds = [
+                outbound for outbound in valid_config.outbounds if outbound.get("protocol") not in ignored_protocols
+            ]
+            validated_configs.append(valid_config)
+        except msgspec.ValidationError as e:
+            logger.error(f"Non valid xray json config: {e}")
+
+    return validated_configs
+
+
 async def dump_xray_subscription(
     provider_name: str,
     url: str,
@@ -34,17 +51,7 @@ async def dump_xray_subscription(
         logger.error(f"Request returned non valid json response: {e}")
         return
 
-    ignored_protocols = ("freedom", "blackhole", "dns", "loopback")
-    validated_configs = []
-    for config in xray_configs:
-        try:
-            valid_config = msgspec.convert(config, type=XraySchema)
-            valid_config.outbounds = [
-                outbound for outbound in valid_config.outbounds if outbound.get("protocol") not in ignored_protocols
-            ]
-            validated_configs.append(valid_config)
-        except msgspec.ValidationError as e:
-            logger.error(f"Request returned non valid xray json config: {e}")
+    validated_configs = get_validated_xray_configs(xray_configs)
 
     validated_configs_len = len(validated_configs)
     if validated_configs_len >= min_proxies:

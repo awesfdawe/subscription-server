@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 import msgspec
-from loguru import logger
+
+from app.files import get_file_content
 
 
 def get_config_dir() -> Path:
@@ -78,21 +79,7 @@ class Config(msgspec.Struct):
 @lru_cache(1)
 def get_config() -> Config:
     config_path = Path(getenv("CONFIG_PATH", get_config_dir() / "config.yaml"))
-
     try:
-        file_content = config_path.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        logger.critical(f"File does not exist at path: {config_path.absolute()}")
-        sys.exit(1)
-    except IsADirectoryError:
-        logger.critical(f"Path is a directory, not a file: {config_path.absolute()}")
-        sys.exit(1)
-    except PermissionError:
-        logger.critical(f"Permission denied when reading file: {config_path.absolute()}")
-        sys.exit(1)
-
-    try:
-        return msgspec.yaml.decode(file_content, type=Config)
-    except msgspec.ValidationError as e:
-        logger.critical(f"Config validation error: {e}")
+        return get_file_content(config_path, "yaml", Config)
+    except OSError, msgspec.MsgspecError:
         sys.exit(1)

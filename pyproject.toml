@@ -12,7 +12,6 @@ dependencies = [
     "msgspec>=0.21.1",
     "sqlalchemy[aiosqlite]>=2.0.51",
     "uvicorn>=0.52.1",
-    "watchfiles>=1.2.0",
 ]
 
 [dependency-groups]
