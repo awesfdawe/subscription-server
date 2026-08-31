@@ -66,6 +66,7 @@ async def lifespan(app: Litestar):
     app.state.users_prefixes = {user.path_prefix for user in users.users.values()}
     app.state.xray_template = get_xray_template(config.app.xray_template_path)
 
+    config.app.proxy_db_path.parent.mkdir(parents=True, exist_ok=True)
     db = Database(f"sqlite+aiosqlite:///{config.app.proxy_db_path}")
 
     providers_names = list(config.proxy_providers.keys())

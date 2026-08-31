@@ -10,11 +10,11 @@ from app.files import get_file_content
 
 
 def get_config_dir() -> Path:
-    return Path("/config") if Path("/config").is_dir() else Path("config")
+    return Path(getenv("CONFIG_DIR", "./config"))
 
 
 def get_data_dir() -> Path:
-    return Path("/data") if Path("/data").is_dir() else Path("data")
+    return Path(getenv("DATA_DIR", "./data"))
 
 
 def default_users_path() -> Path:
@@ -26,7 +26,7 @@ def default_db_path() -> Path:
 
 
 def default_xray_template_path() -> Path:
-    return get_config_dir() / "xray_template.json"
+    return Path(__file__).resolve().parent / "defaults" / "xray_template.json"
 
 
 class AppConfig(msgspec.Struct):
@@ -42,15 +42,13 @@ class AppConfig(msgspec.Struct):
     update_proxies_on_start: bool = False
 
     def __post_init__(self):
-        if not self.path_prefix.startswith("/") and not self.path_prefix.endswith("/"):
+        if not self.path_prefix.startswith("/") or not self.path_prefix.endswith("/"):
             raise ValueError("Path prefix should start with / and end with /. Example: '/sub/', '/'")
 
         if self.response_headers:
             for key, value in self.response_headers.items():
                 if not key.isascii() or not value.isascii():
                     raise ValueError("Response headers can't contain non-ascii symbols")
-
-        self.proxy_db_path.parent.mkdir(parents=True, exist_ok=True)
 
 
 class ProxyProvider(msgspec.Struct):
