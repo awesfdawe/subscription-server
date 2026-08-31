@@ -142,4 +142,4 @@ async def lifespan(app: Litestar):
         scheduler.shutdown(wait=False)
 
 
-app = Litestar([get_subscription], lifespan=[lifespan])
+app = Litestar([get_subscription], lifespan=[lifespan], debug=True)

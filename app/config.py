@@ -37,13 +37,18 @@ class AppConfig(msgspec.Struct):
     users_file_path: Path = msgspec.field(default_factory=default_users_path)
     proxy_db_path: Path = msgspec.field(default_factory=default_db_path)
     xray_template_path: Path = msgspec.field(default_factory=default_xray_template_path)
-    path_prefix: str = "/sub/"
+    path_prefix: str = "/"
     watch_users_file: bool = False
     update_proxies_on_start: bool = False
 
     def __post_init__(self):
         if not self.path_prefix[0] == "/" and self.path_prefix[-1] == "/":
-            raise ValueError("Path prefix should start with / and end with /. Example: '/sub/'")
+            raise ValueError("Path prefix should start with / and end with /. Example: '/sub/', '/'")
+
+        if self.response_headers:
+            for key, value in self.response_headers.items():
+                if not key.isascii() or not value.isascii():
+                    raise ValueError("Response headers can't contain non-ascii symbols")
 
         self.proxy_db_path.parent.mkdir(parents=True, exist_ok=True)
 
