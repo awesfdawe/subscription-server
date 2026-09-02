@@ -7,7 +7,7 @@ from sqlalchemy import delete
 
 from app.database import Database
 from app.proxy.models import Proxy, ProxyProvider
-from app.proxy.schemas import XraySchema
+from app.proxy.schemas.xray import XraySchema
 
 
 def get_validated_xray_configs(xray_configs: list[dict[str, Any]]) -> list[XraySchema]:

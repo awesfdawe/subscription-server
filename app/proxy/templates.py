@@ -16,6 +16,14 @@ def get_xray_template(template_path: Path) -> dict[str, Any]:
         sys.exit(1)
 
 
+@lru_cache(1)
+def get_mihomo_template(template_path: Path) -> dict[str, Any]:
+    try:
+        return get_file_content(template_path, "yaml", dict[str, Any])
+    except OSError, msgspec.MsgspecError:
+        sys.exit(1)
+
+
 def merge_with_xray_template(config: dict[str, Any], template: dict[str, Any]) -> dict[str, Any]:
     merged = config | template
     if template.get("routing") and config.get("routing"):

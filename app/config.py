@@ -25,8 +25,16 @@ def default_db_path() -> Path:
     return get_data_dir() / "db.sqlite3"
 
 
+def defaults_directory_path() -> Path:
+    return Path(__file__).resolve().parent / "defaults"
+
+
 def default_xray_template_path() -> Path:
-    return Path(__file__).resolve().parent / "defaults" / "xray_template.json"
+    return defaults_directory_path() / "xray_template.json"
+
+
+def default_mihomo_template_path() -> Path:
+    return defaults_directory_path() / "mihomo_template.yaml"
 
 
 class AppConfig(msgspec.Struct):
@@ -38,6 +46,7 @@ class AppConfig(msgspec.Struct):
     users_file_path: Path = msgspec.field(default_factory=default_users_path)
     proxy_db_path: Path = msgspec.field(default_factory=default_db_path)
     xray_template_path: Path = msgspec.field(default_factory=default_xray_template_path)
+    mihomo_template_path: Path = msgspec.field(default_factory=default_mihomo_template_path)
     path_prefix: str = "/"
     update_proxies_on_start: bool = False
 

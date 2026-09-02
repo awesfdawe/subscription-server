@@ -17,7 +17,7 @@ from app.files import get_file_content
 from app.logging import setup_logging
 from app.proxy.models import ProxyProvider
 from app.proxy.parser import dump_xray_subscription, get_validated_xray_configs
-from app.proxy.schemas import XraySchema
+from app.proxy.schemas.xray import XraySchema
 from app.proxy.templates import get_xray_template, merge_with_xray_template
 from app.users import get_users
 
