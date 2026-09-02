@@ -25,20 +25,17 @@ class Users(msgspec.Struct):
 class Vnext(msgspec.Struct):
     address: str
     port: int
-    users: Users
+    users: list[Users]
 
 
-class VlessSettings(msgspec.Struct, tag_field="protocol", tag="vless"):
-    vnext: Vnext
+class VlessSettings(msgspec.Struct):
+    vnext: list[Vnext]
 
 
-class HysteriaSettings(msgspec.Struct, tag_field="protocol", tag="hysteria"):
+class HysteriaSettings(msgspec.Struct):
     version: Literal[2]
     address: str
     port: int
-
-
-Settings = VlessSettings | HysteriaSettings
 
 
 class TlsSettings(msgspec.Struct, rename="camel"):
@@ -89,7 +86,7 @@ class XhttpExtra(msgspec.Struct, rename="camel"):
     uplink_data_placement: int | None = None
 
 
-class XhttpStreamSettings(msgspec.Struct, rename="camel"):
+class XhttpStreamSettings(msgspec.Struct):
     host: str | None = None
     path: str | None = None
     mode: Literal["auto", "packet-up", "stream-up", "stream-one"] | None = None
@@ -106,8 +103,16 @@ class StreamSettings(msgspec.Struct, rename="camel"):
     xhttp_settings: XhttpStreamSettings | None = None
 
 
-class Outbound(msgspec.Struct, rename="camel"):
+class VlessOutbound(msgspec.Struct, tag_field="protocol", tag="vless", rename="camel"):
     tag_: str = msgspec.field(name="tag")
-    protocol: Literal["vless", "hysteria"]
-    settings: Settings
+    settings: VlessSettings
     stream_settings: StreamSettings | None = None
+
+
+class HysteriaOutbound(msgspec.Struct, tag_field="protocol", tag="hysteria", rename="camel"):
+    tag_: str = msgspec.field(name="tag")
+    settings: HysteriaSettings
+    stream_settings: StreamSettings | None = None
+
+
+Outbound = VlessOutbound | HysteriaOutbound
