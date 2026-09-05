@@ -65,3 +65,6 @@ class Hysteria(Outbound, rename="kebab", kw_only=True):
     ports: str | UnsetType = UNSET
     hop_interval: int | UnsetType = UNSET
     password: str
+
+
+MihomoOutbounds = Vless | Hysteria

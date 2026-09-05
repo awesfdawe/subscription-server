@@ -108,9 +108,12 @@ class Outbound(msgspec.Struct):
     stream_settings: StreamSettings | None = None
 
 
-class Vless(msgspec.Struct, tag_field="protocol", tag="vless", rename="camel"):
+class Vless(Outbound, tag_field="protocol", tag="vless", rename="camel", kw_only=True):
     settings: VlessSettings
 
 
-class Hysteria(msgspec.Struct, tag_field="protocol", tag="hysteria", rename="camel"):
+class Hysteria(Outbound, tag_field="protocol", tag="hysteria", rename="camel", kw_only=True):
     settings: HysteriaSettings
+
+
+XrayOutbounds = Vless | Hysteria
