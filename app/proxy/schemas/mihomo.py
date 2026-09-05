@@ -4,13 +4,13 @@ import msgspec
 from msgspec import UNSET, UnsetType
 
 
-class Reality(msgspec.Struct, rename="kebab"):
+class RealityOptions(msgspec.Struct, rename="kebab"):
     public_key: str
     short_id: str
 
 
 class Outbound(msgspec.Struct, rename="kebab"):
-    type_: str = msgspec.field(name="type")
+    type_: Literal["vless", "hysteria2"] = msgspec.field(name="type")
     name: str
     server: str
     port: int
@@ -20,14 +20,14 @@ class Outbound(msgspec.Struct, rename="kebab"):
     alpn: list[str] | UnsetType = UNSET
     skip_cert_verify: bool | UnsetType = UNSET
     client_fingerprint: str | UnsetType = UNSET
-    reality_opts: Reality | UnsetType = UNSET
+    reality_opts: RealityOptions | UnsetType = UNSET
 
 
-class Grpc(msgspec.Struct, rename="kebab"):
+class GrpcOptions(msgspec.Struct, rename="kebab"):
     grpc_service_name: str
 
 
-class Xhttp(msgspec.Struct, rename="kebab"):
+class XhttpOptions(msgspec.Struct, rename="kebab"):
     path: str | UnsetType = UNSET
     host: str | UnsetType = UNSET
     mode: Literal["auto", "packet-up", "stream-up", "stream-one"] | UnsetType = UNSET
@@ -52,17 +52,15 @@ class Xhttp(msgspec.Struct, rename="kebab"):
 
 
 class Vless(Outbound, rename="kebab", kw_only=True):
-    type_: Literal["vless"] = "vless"
     uuid: str
     flow: Literal["xtls-rprx-vision"] | UnsetType = UNSET
     packet_encoding: Literal["xudp", "packetaddr"] = "xudp"
     network: Literal["tcp", "grpc", "xhttp"] = "tcp"
-    grpc_opts: Grpc | UnsetType = UNSET
-    xhttp_opts: Xhttp | UnsetType = UNSET
+    grpc_opts: GrpcOptions | UnsetType = UNSET
+    xhttp_opts: XhttpOptions | UnsetType = UNSET
 
 
 class Hysteria(Outbound, rename="kebab", kw_only=True):
-    type_: Literal["hysteria2"] = "hysteria2"
     sni: str | UnsetType = UNSET
     ports: str | UnsetType = UNSET
     hop_interval: int | UnsetType = UNSET

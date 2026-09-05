@@ -7,7 +7,7 @@ class Routing(msgspec.Struct):
     balancers: list[dict[str, Any]] | None = None
 
 
-class XraySchema(msgspec.Struct, rename="camel"):
+class XrayConfigSchema(msgspec.Struct, rename="camel"):
     outbounds: list[dict[str, Any]]
     routing: Routing | None = None
     observatory: dict[str, Any] | None = None
@@ -103,16 +103,14 @@ class StreamSettings(msgspec.Struct, rename="camel"):
     xhttp_settings: XhttpStreamSettings | None = None
 
 
-class VlessOutbound(msgspec.Struct, tag_field="protocol", tag="vless", rename="camel"):
+class Outbound(msgspec.Struct):
     tag_: str = msgspec.field(name="tag")
+    stream_settings: StreamSettings | None = None
+
+
+class Vless(msgspec.Struct, tag_field="protocol", tag="vless", rename="camel"):
     settings: VlessSettings
-    stream_settings: StreamSettings | None = None
 
 
-class HysteriaOutbound(msgspec.Struct, tag_field="protocol", tag="hysteria", rename="camel"):
-    tag_: str = msgspec.field(name="tag")
+class Hysteria(msgspec.Struct, tag_field="protocol", tag="hysteria", rename="camel"):
     settings: HysteriaSettings
-    stream_settings: StreamSettings | None = None
-
-
-Outbound = VlessOutbound | HysteriaOutbound

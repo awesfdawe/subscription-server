@@ -7,16 +7,16 @@ from sqlalchemy import delete
 
 from app.database import Database
 from app.proxy.models import Proxy, ProxyProvider
-from app.proxy.schemas.xray import XraySchema
+from app.proxy.schemas.xray import XrayConfigSchema
 
 
-def get_validated_xray_configs(xray_configs: list[dict[str, Any]]) -> list[XraySchema]:
+def get_validated_xray_configs(xray_configs: list[dict[str, Any]]) -> list[XrayConfigSchema]:
     ignored_protocols = ("freedom", "blackhole", "dns", "loopback")
 
     validated_configs = []
     for config in xray_configs:
         try:
-            valid_config = msgspec.convert(config, type=XraySchema)
+            valid_config = msgspec.convert(config, type=XrayConfigSchema)
         except msgspec.ValidationError as e:
             logger.error(f"Non valid xray json config: {e}")
 
