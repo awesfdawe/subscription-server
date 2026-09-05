@@ -103,7 +103,7 @@ class StreamSettings(msgspec.Struct, rename="camel"):
     xhttp_settings: XhttpStreamSettings | None = None
 
 
-class Outbound(msgspec.Struct):
+class Outbound(msgspec.Struct, rename="camel"):
     tag_: str = msgspec.field(name="tag")
     stream_settings: StreamSettings | None = None
 
