@@ -1,5 +1,7 @@
+import logging
 import sys
 from contextlib import asynccontextmanager
+from os import getenv
 from pathlib import Path
 from typing import Any
 
@@ -122,4 +124,7 @@ async def lifespan(app: Litestar):
         scheduler.shutdown(wait=False)
 
 
-app = Litestar([get_subscription], lifespan=[lifespan])
+debug_ = False
+if logging.getLevelNamesMapping().get(getenv("LOG_LEVEL"), logging.INFO) == 10:
+    debug_ = True
+app = Litestar([get_subscription], lifespan=[lifespan], debug=debug_)
