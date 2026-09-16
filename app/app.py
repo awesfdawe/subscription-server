@@ -2,13 +2,14 @@ import logging
 import re
 import sys
 from contextlib import asynccontextmanager
+from copy import deepcopy
 from os import getenv
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import msgspec
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from litestar import Litestar, Response, get
+from litestar import Litestar, Request, Response, get
 from litestar.datastructures import State
 from litestar.exceptions import NotFoundException
 from sqlalchemy import delete, select
@@ -18,6 +19,7 @@ from app.config import Config, get_config
 from app.database import Database
 from app.files import get_file_content
 from app.logging import setup_logging
+from app.proxy.converters.xray_to_mihomo import multi_xray_configs_to_mihomo
 from app.proxy.models import ProxyProvider
 from app.proxy.parser import dump_xray_subscription, get_validated_xray_configs
 from app.proxy.schemas.xray import XrayConfigSchema
@@ -28,8 +30,10 @@ setup_logging()
 config = get_config()
 
 
-@get(f"{config.app.path_prefix}{{user_path:str}}")
-async def get_subscription(state: State, user_path: str) -> Response[list[dict[str, Any]]]:
+@get([f"{config.app.path_prefix}{{user_path:str}}/{{client_type:str}}", f"{config.app.path_prefix}{{user_path:str}}"])
+async def get_subscription(
+    state: State, request: Request, user_path: str, client_type: Literal["xray", "mihomo"] | None = None
+) -> Response[bytes] | Response[list[dict[str, Any]]]:
     users_prefixes: set[str] = state.users_prefixes
     if user_path in users_prefixes:
         db: Database = state.db
@@ -38,26 +42,58 @@ async def get_subscription(state: State, user_path: str) -> Response[list[dict[s
             result = await db_session.execute(stmt)
 
         config: Config = state.config
-        xray_template: dict[str, Any] = state.xray_template
-
         providers = result.scalars().all()
         file_providers: dict[str, list[XrayConfigSchema]] = state.file_providers
-        subscription = []
+        if client_type is None:
+            user_agent = request.headers.get("user-agent", "")
+            client_type = "mihomo" if state.mihomo_ua_regex.search(user_agent) else "xray"
 
-        for provider_name, provider in config.proxy_providers.items():
-            if provider.show_title and provider.title:
-                subscription.append(
-                    {"outbounds": [{"protocol": "blackhole", "tag": "block"}], "remarks": provider.title}
-                )
-            if provider.type == "url":
-                for db_provider in providers:
-                    if db_provider.name == provider_name:
-                        for proxy in db_provider.proxies:
-                            subscription.append(merge_with_xray_template(proxy.xray_config, xray_template))
-            elif provider.type == "file":
-                for proxy in file_providers[provider_name]:
-                    subscription.append(merge_with_xray_template(msgspec.to_builtins(proxy), xray_template))
-        return Response(subscription, headers=config.app.response_headers)
+        if client_type == "mihomo":
+            xray_configs: list[XrayConfigSchema] = []
+            for provider_name, provider in config.proxy_providers.items():
+                if provider.type == "url":
+                    for db_provider in providers:
+                        if db_provider.name == provider_name:
+                            for proxy in db_provider.proxies:
+                                xray_configs.append(msgspec.convert(proxy.xray_config, type=XrayConfigSchema))
+                elif provider.type == "file" and provider_name in file_providers:
+                    xray_configs.extend(file_providers[provider_name])
+
+            outbounds = multi_xray_configs_to_mihomo(xray_configs)
+
+            mihomo_template: dict[str, Any] = deepcopy(state.mihomo_template)
+            mihomo_template["proxies"] = outbounds
+            for group in mihomo_template.get("proxy-groups", []):
+                if group.get("proxies") is None:
+                    group["proxies"] = [outbound.name for outbound in outbounds]
+
+            return Response(
+                msgspec.yaml.encode(mihomo_template),
+                headers=config.app.response_headers,
+                media_type="application/yaml",
+            )
+        if client_type == "xray":
+            xray_template: dict[str, Any] = state.xray_template
+            subscription = []
+
+            for provider_name, provider in config.proxy_providers.items():
+                if provider.show_title and provider.title:
+                    subscription.append(
+                        {"outbounds": [{"protocol": "blackhole", "tag": "block"}], "remarks": provider.title}
+                    )
+                if provider.type == "url":
+                    for db_provider in providers:
+                        if db_provider.name == provider_name:
+                            for proxy in db_provider.proxies:
+                                subscription.append(merge_with_xray_template(proxy.xray_config, xray_template))
+                elif provider.type == "file":
+                    for proxy in file_providers[provider_name]:
+                        subscription.append(merge_with_xray_template(msgspec.to_builtins(proxy), xray_template))
+
+            return Response(
+                subscription,
+                headers=config.app.response_headers,
+            )
     raise NotFoundException()
 
 

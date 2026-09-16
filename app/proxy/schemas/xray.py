@@ -47,9 +47,9 @@ class TlsSettings(msgspec.Struct, rename="camel"):
 
 class RealitySettings(msgspec.Struct, rename="camel"):
     server_name: str
-    short_id: str
     public_key: str
     fingerprint: str
+    short_id: str | None = None
     spider_x: str | None = None
 
 
@@ -59,7 +59,7 @@ class HysteriaStreamSettings(msgspec.Struct):
 
 
 class GrpcStreamSettings(msgspec.Struct, rename="camel"):
-    service_name: str
+    service_name: str | None = None
     authority: str | None = None
 
 
@@ -67,7 +67,7 @@ class XhttpExtra(msgspec.Struct, rename="camel"):
     headers: dict[str, str] | None = None
     sc_max_buffered_posts: int | None = None
     sc_max_each_post_bytes: int | None = None
-    sc_min_posts_interval_ms: int | None = None
+    sc_min_posts_interval_ms: str | int | None = None
     uplink_http_method: (
         Literal["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"] | None
     ) = msgspec.field(default=None, name="uplinkHTTPMethod")
@@ -83,7 +83,7 @@ class XhttpExtra(msgspec.Struct, rename="camel"):
     seq_placement: str | None = None
     x_padding_bytes: str | None = None
     session_placement: str | None = None
-    uplink_data_placement: int | None = None
+    uplink_data_placement: str | int | None = None
 
 
 class XhttpStreamSettings(msgspec.Struct):

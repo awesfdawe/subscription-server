@@ -1,3 +1,5 @@
+import msgspec
+from loguru import logger
 from msgspec import UNSET
 
 from app.proxy.schemas.mihomo import GrpcOptions as MihomoGrpcOptions
@@ -8,7 +10,7 @@ from app.proxy.schemas.mihomo import Vless as MihomoVless
 from app.proxy.schemas.mihomo import XhttpOptions as MihomoXhttpOptions
 from app.proxy.schemas.xray import Hysteria as XrayHysteria
 from app.proxy.schemas.xray import Vless as XrayVless
-from app.proxy.schemas.xray import XrayOutbounds
+from app.proxy.schemas.xray import XrayConfigSchema, XrayOutbounds
 
 
 def _map_vless(outbound: XrayVless) -> MihomoVless:
@@ -46,12 +48,12 @@ def _map_vless(outbound: XrayVless) -> MihomoVless:
             servername = reality_settings.server_name
             client_fingerprint = reality_settings.fingerprint
             reality_options = MihomoRealityOptions(
-                public_key=reality_settings.public_key, short_id=reality_settings.short_id
+                public_key=reality_settings.public_key, short_id=reality_settings.short_id or UNSET
             )
         grpc_settings = stream_settings.grpc_settings
         if grpc_settings:
             network = "grpc"
-            grpc_opts = MihomoGrpcOptions(grpc_service_name=grpc_settings.service_name)
+            grpc_opts = MihomoGrpcOptions(grpc_service_name=grpc_settings.service_name or "")
         xhttp_settings = stream_settings.xhttp_settings
         if xhttp_settings:
             network = "xhttp"
@@ -183,3 +185,65 @@ def map_xray_to_mihomo(outbound: XrayOutbounds) -> MihomoOutbounds:
             return _map_vless(outbound)
         case XrayHysteria():
             return _map_hysteria(outbound)
+
+
+def multi_xray_configs_to_mihomo(configs: list[XrayConfigSchema]) -> list[MihomoOutbounds]:
+    mihomo_outbounds = []
+    seen = []
+
+    for config in configs:
+        for raw in config.outbounds:
+            if len(config.outbounds) > 1 and raw.get("tag") != "proxy":
+                continue
+            try:
+                xray_outbound = msgspec.convert(raw, type=XrayOutbounds)
+                mihomo_outbound = map_xray_to_mihomo(xray_outbound)
+            except (msgspec.ValidationError, ValueError) as e:
+                logger.error(f"Conversion from xray config to mihomo outbound failed: {e}")
+                continue
+
+            anon = msgspec.structs.replace(mihomo_outbound, name="")
+            if anon in seen:
+                continue
+            seen.append(anon)
+
+            if config.remarks:
+                mihomo_outbound.name = config.remarks
+
+            mihomo_outbounds.append(mihomo_outbound)
+
+    for config in configs:
+        if len(config.outbounds) <= 1:
+            continue
+        for raw in config.outbounds:
+            if raw.get("tag") == "proxy":
+                continue
+            try:
+                xray_outbound = msgspec.convert(raw, type=XrayOutbounds)
+                mihomo_outbound = map_xray_to_mihomo(xray_outbound)
+            except (msgspec.ValidationError, ValueError) as e:
+                logger.error(f"Conversion from xray config to mihomo outbound failed: {e}")
+                continue
+
+            anon = msgspec.structs.replace(mihomo_outbound, name="")
+            if anon in seen:
+                continue
+            seen.append(anon)
+
+            if config.remarks:
+                mihomo_outbound.name = f"{config.remarks} - {xray_outbound.tag_}"
+
+            mihomo_outbounds.append(mihomo_outbound)
+
+    used_names = set()
+    for outbound in mihomo_outbounds:
+        base_name = outbound.name
+        name = base_name
+        idx = 2
+        while name in used_names:
+            name = f"{base_name} {idx}"
+            idx += 1
+        used_names.add(name)
+        outbound.name = name
+
+    return mihomo_outbounds

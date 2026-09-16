@@ -6,7 +6,7 @@ from msgspec import UNSET, UnsetType
 
 class RealityOptions(msgspec.Struct, rename="kebab"):
     public_key: str
-    short_id: str
+    short_id: str | UnsetType = UNSET
 
 
 class Outbound(msgspec.Struct, rename="kebab"):
@@ -46,9 +46,9 @@ class XhttpOptions(msgspec.Struct, rename="kebab"):
     session_key: str | UnsetType = UNSET
     seq_placement: str | UnsetType = UNSET
     seq_key: str | UnsetType = UNSET
-    uplink_data_placement: int | UnsetType = UNSET
+    uplink_data_placement: str | int | UnsetType = UNSET
     sc_max_each_post_bytes: int | UnsetType = UNSET
-    sc_min_posts_interval_ms: int | UnsetType = UNSET
+    sc_min_posts_interval_ms: str | int | UnsetType = UNSET
 
 
 class Vless(Outbound, rename="kebab", kw_only=True):
