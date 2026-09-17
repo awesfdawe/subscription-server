@@ -65,8 +65,8 @@ class GrpcStreamSettings(msgspec.Struct, rename="camel"):
 
 class XhttpExtra(msgspec.Struct, rename="camel"):
     headers: dict[str, str] | None = None
-    sc_max_buffered_posts: int | None = None
-    sc_max_each_post_bytes: int | None = None
+    sc_max_buffered_posts: str | int | None = None
+    sc_max_each_post_bytes: str | int | None = None
     sc_min_posts_interval_ms: str | int | None = None
     uplink_http_method: (
         Literal["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"] | None

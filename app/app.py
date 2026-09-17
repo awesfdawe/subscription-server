@@ -18,7 +18,6 @@ from sqlalchemy.orm import selectinload
 from app.config import Config, get_config
 from app.database import Database
 from app.files import get_file_content
-from app.logging import setup_logging
 from app.proxy.converters.xray_to_mihomo import multi_xray_configs_to_mihomo
 from app.proxy.models import ProxyProvider
 from app.proxy.parser import dump_xray_subscription, get_validated_xray_configs
@@ -26,7 +25,6 @@ from app.proxy.schemas.xray import XrayConfigSchema
 from app.proxy.templates import get_mihomo_template, get_xray_template, merge_with_xray_template
 from app.users import get_users
 
-setup_logging()
 config = get_config()
 
 

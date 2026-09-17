@@ -47,7 +47,7 @@ class XhttpOptions(msgspec.Struct, rename="kebab"):
     seq_placement: str | UnsetType = UNSET
     seq_key: str | UnsetType = UNSET
     uplink_data_placement: str | int | UnsetType = UNSET
-    sc_max_each_post_bytes: int | UnsetType = UNSET
+    sc_max_each_post_bytes: str | int | UnsetType = UNSET
     sc_min_posts_interval_ms: str | int | UnsetType = UNSET
 
 
