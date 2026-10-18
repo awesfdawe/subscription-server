@@ -47,17 +47,20 @@ async def get_subscription(
             client_type = "mihomo" if state.mihomo_ua_regex.search(user_agent) else "xray"
 
         if client_type == "mihomo":
-            xray_configs: list[XrayConfigSchema] = []
+            provider_configs: list[list[XrayConfigSchema]] = []
             for provider_name, provider in config.proxy_providers.items():
+                current_configs: list[XrayConfigSchema] = []
                 if provider.type == "url":
                     for db_provider in providers:
                         if db_provider.name == provider_name:
                             for proxy in db_provider.proxies:
-                                xray_configs.append(msgspec.convert(proxy.xray_config, type=XrayConfigSchema))
+                                current_configs.append(msgspec.convert(proxy.xray_config, type=XrayConfigSchema))
                 elif provider.type == "file" and provider_name in file_providers:
-                    xray_configs.extend(file_providers[provider_name])
+                    current_configs.extend(file_providers[provider_name])
+                if current_configs:
+                    provider_configs.append(current_configs)
 
-            outbounds = multi_xray_configs_to_mihomo(xray_configs)
+            outbounds = multi_xray_configs_to_mihomo(provider_configs)
 
             mihomo_template: dict[str, Any] = deepcopy(state.mihomo_template)
             mihomo_template["proxies"] = outbounds

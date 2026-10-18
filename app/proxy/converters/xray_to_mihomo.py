@@ -1,3 +1,5 @@
+from typing import cast
+
 import msgspec
 from loguru import logger
 from msgspec import UNSET
@@ -187,62 +189,139 @@ def map_xray_to_mihomo(outbound: XrayOutbounds) -> MihomoOutbounds:
             return _map_hysteria(outbound)
 
 
-def multi_xray_configs_to_mihomo(configs: list[XrayConfigSchema]) -> list[MihomoOutbounds]:
-    mihomo_outbounds = []
-    seen = []
-
-    for config in configs:
-        for raw in config.outbounds:
-            if len(config.outbounds) > 1 and raw.get("tag") != "proxy":
-                continue
-            try:
-                xray_outbound = msgspec.convert(raw, type=XrayOutbounds)
-                mihomo_outbound = map_xray_to_mihomo(xray_outbound)
-            except (msgspec.ValidationError, ValueError) as e:
-                logger.error(f"Conversion from xray config to mihomo outbound failed: {e}")
-                continue
-
-            anon = msgspec.structs.replace(mihomo_outbound, name="")
-            if anon in seen:
-                continue
-            seen.append(anon)
-
-            if config.remarks:
-                mihomo_outbound.name = config.remarks
-
-            mihomo_outbounds.append(mihomo_outbound)
-
-    for config in configs:
-        if len(config.outbounds) <= 1:
+def extract_outbound_signatures(configuration: XrayConfigSchema) -> list[bytes]:
+    signatures: list[bytes] = []
+    for raw_outbound in configuration.outbounds:
+        try:
+            xray_outbound = msgspec.convert(raw_outbound, type=XrayOutbounds)
+            mihomo_outbound = map_xray_to_mihomo(xray_outbound)
+        except (msgspec.ValidationError, ValueError) as error:
+            logger.error(f"Conversion from xray config to mihomo outbound failed: {error}")
             continue
-        for raw in config.outbounds:
-            if raw.get("tag") == "proxy":
+
+        anonymous_outbound = msgspec.structs.replace(mihomo_outbound, name="")
+        signature = msgspec.json.encode(anonymous_outbound)
+        if signature not in signatures:
+            signatures.append(signature)
+    return signatures
+
+
+def split_single_and_multi_configurations(
+    configurations: list[XrayConfigSchema],
+) -> tuple[list[XrayConfigSchema], list[XrayConfigSchema]]:
+    configurations_signatures = [extract_outbound_signatures(configuration) for configuration in configurations]
+
+    signature_occurrences: dict[bytes, int] = {}
+    for signatures in configurations_signatures:
+        for signature in signatures:
+            signature_occurrences[signature] = signature_occurrences.get(signature, 0) + 1
+
+    half_configurations_count = len(configurations) / 2
+    meaningful_signatures = [
+        [signature for signature in signatures if signature_occurrences[signature] <= half_configurations_count]
+        for signatures in configurations_signatures
+    ]
+
+    single_configurations: list[XrayConfigSchema] = []
+    multi_proxy_configurations: list[XrayConfigSchema] = []
+
+    for index, (configuration, signatures) in enumerate(zip(configurations, meaningful_signatures, strict=True)):
+        other_configurations_contained = 0
+        for other_index, other_signatures in enumerate(meaningful_signatures):
+            if other_index == index or not other_signatures:
                 continue
-            try:
-                xray_outbound = msgspec.convert(raw, type=XrayOutbounds)
-                mihomo_outbound = map_xray_to_mihomo(xray_outbound)
-            except (msgspec.ValidationError, ValueError) as e:
-                logger.error(f"Conversion from xray config to mihomo outbound failed: {e}")
-                continue
+            if all(signature in signatures for signature in other_signatures):
+                other_configurations_contained += 1
 
-            anon = msgspec.structs.replace(mihomo_outbound, name="")
-            if anon in seen:
-                continue
-            seen.append(anon)
+        if other_configurations_contained >= 2:
+            multi_proxy_configurations.append(configuration)
+        else:
+            single_configurations.append(configuration)
 
-            if config.remarks:
-                mihomo_outbound.name = f"{config.remarks} - {xray_outbound.tag_}"
+    return single_configurations, multi_proxy_configurations
 
-            mihomo_outbounds.append(mihomo_outbound)
 
-    used_names = set()
+def multi_xray_configs_to_mihomo(
+    configs: list[list[XrayConfigSchema]] | list[XrayConfigSchema],
+) -> list[MihomoOutbounds]:
+    if not configs:
+        return []
+
+    first_element = configs[0]
+    provider_batches: list[list[XrayConfigSchema]]
+    if isinstance(first_element, XrayConfigSchema):
+        provider_batches = [cast(list[XrayConfigSchema], configs)]
+    else:
+        provider_batches = cast(list[list[XrayConfigSchema]], configs)
+
+    mihomo_outbounds: list[MihomoOutbounds] = []
+
+    for batch in provider_batches:
+        single_configurations, multi_proxy_configurations = split_single_and_multi_configurations(batch)
+
+        seen_signatures: set[bytes] = set()
+        provider_single_outbounds: list[MihomoOutbounds] = []
+        provider_multi_outbounds: list[MihomoOutbounds] = []
+
+        for configuration in single_configurations:
+            primary_outbound = next(
+                (outbound for outbound in configuration.outbounds if outbound.get("tag") == "proxy"),
+                configuration.outbounds[0] if configuration.outbounds else None,
+            )
+
+            for raw_outbound in configuration.outbounds:
+                try:
+                    xray_outbound = msgspec.convert(raw_outbound, type=XrayOutbounds)
+                    mihomo_outbound = map_xray_to_mihomo(xray_outbound)
+                except (msgspec.ValidationError, ValueError) as error:
+                    logger.error(f"Conversion from xray config to mihomo outbound failed: {error}")
+                    continue
+
+                anonymous_outbound = msgspec.structs.replace(mihomo_outbound, name="")
+                signature = msgspec.json.encode(anonymous_outbound)
+                if signature in seen_signatures:
+                    continue
+                seen_signatures.add(signature)
+
+                if configuration.remarks:
+                    if raw_outbound is not primary_outbound:
+                        mihomo_outbound.name = f"{configuration.remarks} - {xray_outbound.tag_}"
+                    else:
+                        mihomo_outbound.name = configuration.remarks
+
+                provider_single_outbounds.append(mihomo_outbound)
+
+        for configuration in multi_proxy_configurations:
+            for raw_outbound in configuration.outbounds:
+                try:
+                    xray_outbound = msgspec.convert(raw_outbound, type=XrayOutbounds)
+                    mihomo_outbound = map_xray_to_mihomo(xray_outbound)
+                except (msgspec.ValidationError, ValueError) as error:
+                    logger.error(f"Conversion from xray config to mihomo outbound failed: {error}")
+                    continue
+
+                anonymous_outbound = msgspec.structs.replace(mihomo_outbound, name="")
+                signature = msgspec.json.encode(anonymous_outbound)
+                if signature in seen_signatures:
+                    continue
+                seen_signatures.add(signature)
+
+                if configuration.remarks:
+                    mihomo_outbound.name = f"{configuration.remarks} - {xray_outbound.tag_}"
+
+                provider_multi_outbounds.append(mihomo_outbound)
+
+        mihomo_outbounds.extend(provider_single_outbounds)
+        mihomo_outbounds.extend(provider_multi_outbounds)
+
+    used_names: set[str] = set()
     for outbound in mihomo_outbounds:
         base_name = outbound.name
         name = base_name
-        idx = 2
+        counter = 2
         while name in used_names:
-            name = f"{base_name} {idx}"
-            idx += 1
+            name = f"{base_name} {counter}"
+            counter += 1
         used_names.add(name)
         outbound.name = name
 
