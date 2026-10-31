@@ -1,11 +1,11 @@
-FROM ghcr.io/astral-sh/uv:python3.14-alpine AS builder
+FROM ghcr.io/astral-sh/uv:python3.15-alpine AS builder
 
 WORKDIR /build
 COPY . .
 
 RUN uv build --wheel
 
-FROM ghcr.io/astral-sh/uv:python3.14-alpine
+FROM ghcr.io/astral-sh/uv:python3.15-alpine
 
 WORKDIR /app
 COPY --from=builder /build/dist/*.whl ./
