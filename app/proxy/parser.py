@@ -19,6 +19,7 @@ def get_validated_xray_configs(xray_configs: list[dict[str, Any]]) -> list[XrayC
             valid_config = msgspec.convert(config, type=XrayConfigSchema)
         except msgspec.ValidationError as e:
             logger.error(f"Non valid xray json config: {e}")
+            continue
 
         valid_config.outbounds = [
             outbound for outbound in valid_config.outbounds if outbound.get("protocol") not in ignored_protocols

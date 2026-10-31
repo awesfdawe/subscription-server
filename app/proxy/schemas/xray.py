@@ -13,13 +13,14 @@ class XrayConfigSchema(msgspec.Struct, rename="camel"):
     observatory: dict[str, Any] | None = None
     burst_observatory: dict[str, Any] | None = None
     remarks: str | None = None
-    meta: dict[str, str] | None = None
+    meta: dict[str, Any] | None = None
 
 
 class Users(msgspec.Struct):
     id: str
-    encryption: Literal["none"]
-    flow: Literal["xtls-rprx-vision", ""] | None = None
+    encryption: str | None = "none"
+    flow: str | None = None
+    packet_encoding: str | None = msgspec.field(default=None, name="packetEncoding")
 
 
 class Vnext(msgspec.Struct):
@@ -33,29 +34,30 @@ class VlessSettings(msgspec.Struct):
 
 
 class HysteriaSettings(msgspec.Struct):
-    version: Literal[2]
     address: str
     port: int
+    version: int | str | None = 2
 
 
 class TlsSettings(msgspec.Struct, rename="camel"):
-    server_name: str
+    server_name: str | None = None
     fingerprint: str | None = None
     alpn: list[str] | None = None
     allow_insecure: bool | None = None
+    pinned_peer_cert_sha256: str | None = None
 
 
 class RealitySettings(msgspec.Struct, rename="camel"):
-    server_name: str
     public_key: str
-    fingerprint: str
+    server_name: str | None = None
+    fingerprint: str | None = None
     short_id: str | None = None
     spider_x: str | None = None
 
 
 class HysteriaStreamSettings(msgspec.Struct):
-    version: Literal[2]
     auth: str
+    version: int | str | None = 2
 
 
 class GrpcStreamSettings(msgspec.Struct, rename="camel"):
@@ -63,11 +65,20 @@ class GrpcStreamSettings(msgspec.Struct, rename="camel"):
     authority: str | None = None
 
 
+class WsStreamSettings(msgspec.Struct, rename="camel"):
+    path: str | None = None
+    headers: dict[str, str] | None = None
+
+
 class XhttpExtra(msgspec.Struct, rename="camel"):
     headers: dict[str, str] | None = None
     sc_max_buffered_posts: str | int | None = None
     sc_max_each_post_bytes: str | int | None = None
     sc_min_posts_interval_ms: str | int | None = None
+    sc_stream_up_server_secs: str | int | None = None
+    server_max_header_bytes: str | int | None = None
+    uplink_chunk_size: str | int | None = None
+    uplink_data_key: str | None = None
     uplink_http_method: (
         Literal["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"] | None
     ) = msgspec.field(default=None, name="uplinkHTTPMethod")
@@ -84,22 +95,25 @@ class XhttpExtra(msgspec.Struct, rename="camel"):
     x_padding_bytes: str | None = None
     session_placement: str | None = None
     uplink_data_placement: str | int | None = None
+    xmux: dict[str, Any] | None = None
 
 
 class XhttpStreamSettings(msgspec.Struct):
     host: str | None = None
     path: str | None = None
     mode: Literal["auto", "packet-up", "stream-up", "stream-one"] | None = None
+    headers: dict[str, str] | None = None
     extra: XhttpExtra | None = None
 
 
 class StreamSettings(msgspec.Struct, rename="camel"):
-    network: Literal["tcp", "hysteria", "xhttp", "grpc"]
-    security: Literal["reality", "tls", "none"]
+    network: str | None = "tcp"
+    security: str | None = "none"
     tls_settings: TlsSettings | None = None
     reality_settings: RealitySettings | None = None
     hysteria_settings: HysteriaStreamSettings | None = None
     grpc_settings: GrpcStreamSettings | None = None
+    ws_settings: WsStreamSettings | None = None
     xhttp_settings: XhttpStreamSettings | None = None
 
 
@@ -116,4 +130,8 @@ class Hysteria(Outbound, tag_field="protocol", tag="hysteria", rename="camel", k
     settings: HysteriaSettings
 
 
-XrayOutbounds = Vless | Hysteria
+class Hysteria2(Outbound, tag_field="protocol", tag="hysteria2", rename="camel", kw_only=True):
+    settings: HysteriaSettings
+
+
+XrayOutbounds = Vless | Hysteria | Hysteria2
