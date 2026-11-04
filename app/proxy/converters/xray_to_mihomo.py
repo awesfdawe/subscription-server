@@ -315,7 +315,9 @@ def split_single_and_multi_configurations(
         for other_index, other_signatures in enumerate(meaningful_signatures):
             if other_index == index or not other_signatures:
                 continue
-            if all(signature in signatures for signature in other_signatures):
+            if len(signatures) > len(other_signatures) and all(
+                signature in signatures for signature in other_signatures
+            ):
                 other_configurations_contained += 1
 
         if other_configurations_contained >= 2:
